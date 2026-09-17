@@ -186,6 +186,27 @@ This command will run e2e tests. Cluster should be up and ready for it to sucsee
 make e2e
 ```
 
+## Linting and Formatting
+
+The backend uses [`gofmt`](https://pkg.go.dev/cmd/gofmt) for formatting and [`golangci-lint`](https://golangci-lint.run/) for linting. The frontend uses [Prettier](https://prettier.io/) for formatting and [`oxlint`](https://oxc.rs/docs/guide/usage/linter.html) for linting.
+
+Check formatting and linting for both projects:
+
+```bash
+make fmt-check
+make lint
+```
+
+Auto-fix formatting:
+
+```bash
+make fmt
+```
+
+Individual targets are also available: `make backend-fmt`, `make backend-fmt-check`, `make backend-lint`, `make frontend-fmt`, `make frontend-fmt-check`, `make frontend-lint`.
+
+`golangci-lint` must be installed locally to run `make backend-lint` (or `make lint`) outside of CI. See the [installation guide](https://golangci-lint.run/welcome/install/).
+
 ## Additional Commands
 
 The individual steps can also be executed separately:
