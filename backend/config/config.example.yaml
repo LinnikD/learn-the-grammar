@@ -1,0 +1,4 @@
+# Example backend configuration file, showing all fields at their
+# default values. Copy it and pass its path via the `-config` flag
+# or the LTG_CONFIG_FILE environment variable.
+port: 8080

@@ -16,6 +16,7 @@ FRONTEND_IMAGE := learn-the-grammar-frontend:dev
 	app-deploy app-delete \
 	status \
 	frontend-dev backend-dev \
+	unit-test \
 	e2e
 
 
@@ -118,6 +119,9 @@ frontend-dev:
 
 backend-dev:
 	cd backend && go run .
+
+unit-test:
+	cd backend && go test ./...
 
 e2e:
 	cd e2e && npm test

@@ -103,10 +103,7 @@ To point the backend at a YAML config file, use the `-config` flag or the `LTG_C
 go run . -config /path/to/config.yaml
 ```
 
-```yaml
-# config.yaml
-port: 9090
-```
+See [backend/config/config.example.yaml](backend/config/config.example.yaml) for an example config file.
 
 ## Kubernetes Mode
 
@@ -176,6 +173,12 @@ make app-stop
 ```
 
 ## Run tests
+
+To run backend unit tests:
+
+```bash
+make unit-test
+```
 
 This command will run e2e tests. Cluster should be up and ready for it to sucseed.
 
