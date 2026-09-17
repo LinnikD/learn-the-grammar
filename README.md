@@ -150,6 +150,14 @@ To stop the environment and delete the local cluster:
 make app-stop
 ```
 
+## Run tests
+
+This command will run e2e tests. Cluster should be up and ready for it to sucseed.
+
+```bash
+make e2e
+```
+
 ## Additional Commands
 
 The individual steps can also be executed separately:

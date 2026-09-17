@@ -15,7 +15,8 @@ FRONTEND_IMAGE := learn-the-grammar-frontend:dev
 	images-build images-load \
 	app-deploy app-delete \
 	status \
-	frontend-dev backend-dev
+	frontend-dev backend-dev \
+	e2e
 
 
 app-run: cluster-up ingress-up images-build images-load app-deploy
@@ -117,3 +118,6 @@ frontend-dev:
 
 backend-dev:
 	cd backend && go run .
+
+e2e:
+	cd e2e && npm test
