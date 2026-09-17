@@ -83,6 +83,31 @@ http://localhost:5173
 
 This mode is recommended for day-to-day development because frontend changes are immediately available through Vite HMR.
 
+## Backend Configuration
+
+The backend loads configuration from three sources, in ascending order of priority:
+
+1. built-in defaults;
+2. an optional YAML config file;
+3. environment variables.
+
+A field set in a higher-priority source overrides the same field from a lower one. Fields absent from the YAML file simply keep their default value; unrecognized keys in the file are ignored.
+
+| Field  | YAML key | Env var    | Default | Description             |
+|--------|----------|------------|---------|--------------------------|
+| Port   | `port`   | `LTG_PORT` | `8080`  | TCP port the server listens on |
+
+To point the backend at a YAML config file, use the `-config` flag or the `LTG_CONFIG_FILE` environment variable (the flag takes precedence):
+
+```bash
+go run . -config /path/to/config.yaml
+```
+
+```yaml
+# config.yaml
+port: 9090
+```
+
 ## Kubernetes Mode
 
 Kubernetes mode runs the complete containerized application inside a local `kind` cluster.

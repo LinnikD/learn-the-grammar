@@ -2,8 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
+
+	"github.com/LinnikD/learn-the-grammar/backend/config"
 )
 
 type helloResponse struct {
@@ -11,6 +16,14 @@ type helloResponse struct {
 }
 
 func main() {
+	configPath := flag.String("config", os.Getenv("LTG_CONFIG_FILE"), "path to YAML config file (defaults to LTG_CONFIG_FILE env var)")
+	flag.Parse()
+
+	cfg, err := config.Load(*configPath)
+	if err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /api/hello", func(w http.ResponseWriter, r *http.Request) {
@@ -27,9 +40,11 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	log.Println("server listening on :8080")
+	addr := fmt.Sprintf(":%d", cfg.Port)
 
-	if err := http.ListenAndServe(":8080", mux); err != nil {
+	log.Printf("server listening on %s", addr)
+
+	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatal(err)
 	}
 }
