@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 
-test('home page displays Hello World', async ({ page }) => {
+test('home page displays Learn The Grammar!', async ({ page }) => {
   await page.goto('/')
 
-  await expect(page.getByText('Hello World')).toBeVisible()
+  await expect(page.getByText('Learn The Grammar!')).toBeVisible()
 })
