@@ -6,7 +6,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/LinnikD/learn-the-grammar/backend/internal/config"
+	"github.com/LinnikD/learn-the-grammar/backend/internal/middleware"
 )
 
 const shutdownTimeout = 10 * time.Second
@@ -32,7 +33,7 @@ func newMux() http.Handler {
 		if err := json.NewEncoder(w).Encode(helloResponse{
 			Message: "Learn The Grammar!",
 		}); err != nil {
-			log.Printf("failed to encode response: %v", err)
+			slog.Error("failed to encode response", "error", err)
 		}
 	})
 
@@ -61,7 +62,7 @@ func serve(ctx context.Context, listener net.Listener, handler http.Handler, shu
 		}
 		return nil
 	case <-ctx.Done():
-		log.Println("shutting down server...")
+		slog.Info("shutting down server")
 
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 		defer cancel()
@@ -71,29 +72,37 @@ func serve(ctx context.Context, listener net.Listener, handler http.Handler, shu
 }
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
+
 	configPath := flag.String("config", os.Getenv("LTG_CONFIG_FILE"), "path to YAML config file (defaults to LTG_CONFIG_FILE env var)")
 	flag.Parse()
 
 	cfg, err := config.Load(*configPath)
 	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
+		slog.Error("failed to load config", "error", err)
+		os.Exit(1)
 	}
 
 	addr := fmt.Sprintf(":%d", cfg.Port)
 
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
-		log.Fatalf("failed to listen on %s: %v", addr, err)
+		slog.Error("failed to listen", "addr", addr, "error", err)
+		os.Exit(1)
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	log.Printf("server listening on %s", addr)
+	handler := middleware.Logging(logger)(newMux())
 
-	if err := serve(ctx, listener, newMux(), shutdownTimeout); err != nil {
-		log.Fatal(err)
+	slog.Info("server listening", "addr", addr)
+
+	if err := serve(ctx, listener, handler, shutdownTimeout); err != nil {
+		slog.Error("server error", "error", err)
+		os.Exit(1)
 	}
 
-	log.Println("server stopped")
+	slog.Info("server stopped")
 }
