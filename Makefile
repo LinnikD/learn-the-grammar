@@ -121,7 +121,7 @@ frontend-dev:
 	cd frontend && npm run dev -- --host
 
 backend-dev:
-	cd backend && go run .
+	cd backend && go run ./cmd/server
 
 unit-test:
 	cd backend && go test ./...
