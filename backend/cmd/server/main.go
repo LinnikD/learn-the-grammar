@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/LinnikD/learn-the-grammar/backend/config"
+	"github.com/LinnikD/learn-the-grammar/backend/internal/config"
 )
 
 type helloResponse struct {

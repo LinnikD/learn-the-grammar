@@ -100,10 +100,10 @@ A field set in a higher-priority source overrides the same field from a lower on
 To point the backend at a YAML config file, use the `-config` flag or the `LTG_CONFIG_FILE` environment variable (the flag takes precedence):
 
 ```bash
-go run . -config /path/to/config.yaml
+go run ./cmd/server -config /path/to/config.yaml
 ```
 
-See [backend/config/config.example.yaml](backend/config/config.example.yaml) for an example config file.
+See [backend/internal/config/config.example.yaml](backend/internal/config/config.example.yaml) for an example config file.
 
 ## Kubernetes Mode
 
