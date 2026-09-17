@@ -17,6 +17,9 @@ FRONTEND_IMAGE := learn-the-grammar-frontend:dev
 	status \
 	frontend-dev backend-dev \
 	unit-test \
+	fmt fmt-check lint \
+	backend-fmt backend-fmt-check backend-lint \
+	frontend-fmt frontend-fmt-check frontend-lint \
 	e2e
 
 
@@ -122,6 +125,35 @@ backend-dev:
 
 unit-test:
 	cd backend && go test ./...
+
+fmt: backend-fmt frontend-fmt
+
+fmt-check: backend-fmt-check frontend-fmt-check
+
+lint: backend-lint frontend-lint
+
+backend-fmt:
+	cd backend && gofmt -s -w .
+
+backend-fmt-check:
+	@cd backend && unformatted=$$(gofmt -l .); \
+	if [ -n "$$unformatted" ]; then \
+		echo "The following files are not gofmt'ed:"; \
+		echo "$$unformatted"; \
+		exit 1; \
+	fi
+
+backend-lint:
+	cd backend && golangci-lint run ./...
+
+frontend-fmt:
+	cd frontend && npm run format
+
+frontend-fmt-check:
+	cd frontend && npm run format:check
+
+frontend-lint:
+	cd frontend && npm run lint
 
 e2e:
 	cd e2e && npm test
