@@ -17,7 +17,7 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 
 		if err := json.NewEncoder(w).Encode(helloResponse{
-			Message: "Hello World",
+			Message: "Learn The Grammar!",
 		}); err != nil {
 			log.Printf("failed to encode response: %v", err)
 		}
