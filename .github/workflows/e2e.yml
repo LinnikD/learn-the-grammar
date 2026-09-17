@@ -43,3 +43,11 @@ jobs:
 
       - name: Run E2E tests
         run: make e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: playwright-report
+          path: e2e/playwright-report/
+          retention-days: 7
