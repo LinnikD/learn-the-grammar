@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"flag"
 	"fmt"
@@ -13,12 +15,18 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/LinnikD/learn-the-grammar/backend/internal/api"
 	"github.com/LinnikD/learn-the-grammar/backend/internal/config"
 	"github.com/LinnikD/learn-the-grammar/backend/internal/middleware"
+	"github.com/LinnikD/learn-the-grammar/backend/internal/session"
 )
 
-const shutdownTimeout = 10 * time.Second
+const (
+	shutdownTimeout = 10 * time.Second
+	sessionTTL      = 30 * 24 * time.Hour
+)
 
 // server implements api.StrictServerInterface, the contract generated
 // from api/openapi.yaml.
@@ -28,18 +36,58 @@ func (server) GetHello(_ context.Context, _ api.GetHelloRequestObject) (api.GetH
 	return api.GetHello200JSONResponse{Message: "Learn The Grammar!"}, nil
 }
 
-func newMux() http.Handler {
+func (server) GetMe(ctx context.Context, _ api.GetMeRequestObject) (api.GetMeResponseObject, error) {
+	userID, ok := middleware.UserIDFromContext(ctx)
+	if !ok {
+		// Unreachable in practice: the Session middleware always sets
+		// this before GetMe can run.
+		return nil, errors.New("no user id in request context")
+	}
+
+	parsed, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, fmt.Errorf("parsing session user id: %w", err)
+	}
+
+	return api.GetMe200JSONResponse{UserId: parsed}, nil
+}
+
+func newMux(sessionManager *session.Manager) http.Handler {
 	mux := http.NewServeMux()
 
-	api.HandlerFromMux(api.NewStrictHandler(server{}, nil), mux)
+	api.HandlerWithOptions(api.NewStrictHandler(server{}, nil), api.StdHTTPServerOptions{
+		BaseRouter:  mux,
+		Middlewares: []api.MiddlewareFunc{middleware.Session(sessionManager)},
+	})
 
 	// /health is infrastructure-only (Kubernetes probes) and deliberately
-	// not part of the OpenAPI contract consumed by the frontend.
+	// not part of the OpenAPI contract consumed by the frontend, so it
+	// stays outside the session middleware too.
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
 	return mux
+}
+
+// resolveSessionSecret returns cfg's configured secret, or a freshly
+// generated random one if none was configured. A random secret is fine
+// for local development — it just means sessions don't survive a
+// restart — but any long-lived deployment should set LTG_SESSION_SECRET
+// explicitly.
+func resolveSessionSecret(configured string) (string, error) {
+	if configured != "" {
+		return configured, nil
+	}
+
+	buf := make([]byte, 32)
+	if _, err := rand.Read(buf); err != nil {
+		return "", fmt.Errorf("generating random session secret: %w", err)
+	}
+
+	slog.Warn("no session secret configured, generated a random one for this run; sessions will not survive a restart")
+
+	return hex.EncodeToString(buf), nil
 }
 
 // serve runs an HTTP server on listener until ctx is cancelled, then shuts
@@ -82,6 +130,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	sessionSecret, err := resolveSessionSecret(cfg.SessionSecret)
+	if err != nil {
+		slog.Error("failed to resolve session secret", "error", err)
+		os.Exit(1)
+	}
+	sessionManager := session.NewManager([]byte(sessionSecret), sessionTTL)
+
 	addr := fmt.Sprintf(":%d", cfg.Port)
 
 	listener, err := net.Listen("tcp", addr)
@@ -93,7 +148,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	handler := middleware.Logging(logger)(newMux())
+	handler := middleware.Logging(logger)(newMux(sessionManager))
 
 	slog.Info("server listening", "addr", addr)
 

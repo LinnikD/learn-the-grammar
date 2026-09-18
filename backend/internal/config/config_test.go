@@ -22,6 +22,7 @@ func TestLoad_DefaultsOnly(t *testing.T) {
 	cfg, err := Load("")
 	require.NoError(t, err)
 	assert.Equal(t, 8080, cfg.Port)
+	assert.Empty(t, cfg.SessionSecret)
 }
 
 func TestLoad_FileOverridesPort(t *testing.T) {
@@ -74,4 +75,21 @@ func TestLoad_InvalidEnvValue(t *testing.T) {
 
 	_, err := Load("")
 	assert.Error(t, err)
+}
+
+func TestLoad_SessionSecretFromFile(t *testing.T) {
+	path := writeFile(t, "port: 9090\nsession_secret: from-file\n")
+
+	cfg, err := Load(path)
+	require.NoError(t, err)
+	assert.Equal(t, "from-file", cfg.SessionSecret)
+}
+
+func TestLoad_SessionSecretEnvOverridesFile(t *testing.T) {
+	path := writeFile(t, "port: 9090\nsession_secret: from-file\n")
+	t.Setenv("LTG_SESSION_SECRET", "from-env")
+
+	cfg, err := Load(path)
+	require.NoError(t, err)
+	assert.Equal(t, "from-env", cfg.SessionSecret)
 }

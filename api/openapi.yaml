@@ -23,6 +23,24 @@ paths:
               schema:
                 $ref: "#/components/schemas/HelloResponse"
 
+  /api/me:
+    get:
+      operationId: getMe
+      summary: Returns the current session's user ID.
+      description: >
+        Every request automatically carries or receives a session
+        (see the Set-Cookie response header on first visit) identifying
+        a user. There is no login yet, so this ID is not backed by any
+        registered account — it simply identifies the current browser
+        across requests.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeResponse"
+
 components:
   schemas:
     HelloResponse:
@@ -32,3 +50,12 @@ components:
       properties:
         message:
           type: string
+
+    MeResponse:
+      type: object
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: string
+          format: uuid

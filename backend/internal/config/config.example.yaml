@@ -2,3 +2,9 @@
 # default values. Copy it and pass its path via the `-config` flag
 # or the LTG_CONFIG_FILE environment variable.
 port: 8080
+
+# Signs session tokens (see internal/session). If left empty, the
+# server generates a random secret on each startup, which is fine for
+# local development but means every restart invalidates existing
+# sessions — set this explicitly for any long-lived deployment.
+session_secret: ""
