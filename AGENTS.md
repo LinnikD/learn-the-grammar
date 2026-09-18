@@ -17,6 +17,8 @@ Propose a concise implementation plan.
 Explain important architectural decisions, tradeoffs, or assumptions.
 List the files you expect to modify.
 Wait for explicit approval before modifying files.
+Discussing features take a look into doc/ directory and check requirements
+On any requirements conflict discuss it explicitly before implementation
 
 Do not start implementation while discussing or refining the plan.
 
@@ -80,6 +82,7 @@ For minor implementation details that do not affect behavior or architecture, us
 
 ## Documentation
 
+Documentation stored in the doc/ directory
 Change documentation and even AGENTS.md files if the logic was changed during the implementation.
 Keep comments and readme files up to date.
 
