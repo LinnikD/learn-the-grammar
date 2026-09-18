@@ -13,6 +13,11 @@ import (
 // Config holds all backend configuration values.
 type Config struct {
 	Port int `yaml:"port"`
+
+	// SessionSecret signs session tokens (see internal/session). If empty,
+	// the caller is expected to generate an ephemeral one instead of
+	// running with no secret at all — see cmd/server for that policy.
+	SessionSecret string `yaml:"session_secret"`
 }
 
 func defaultConfig() Config {
@@ -49,6 +54,10 @@ func Load(path string) (Config, error) {
 			return Config{}, fmt.Errorf("parsing LTG_PORT %q: %w", v, err)
 		}
 		cfg.Port = port
+	}
+
+	if v, ok := os.LookupEnv("LTG_SESSION_SECRET"); ok {
+		cfg.SessionSecret = v
 	}
 
 	return cfg, nil

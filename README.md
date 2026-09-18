@@ -126,6 +126,14 @@ To check that the committed generated code still matches the spec (used in CI):
 make generate-check
 ```
 
+## Sessions
+
+There is no login yet. Instead, every request automatically gets a session: if it doesn't already carry a valid `ltg_session` cookie, the backend mints a new one for a freshly generated user ID and sets it (`HttpOnly`, `Secure`, `SameSite=Lax`, signed JWT, 30-day expiry). `GET /api/me` returns the current session's user ID.
+
+This is meant to carry over once real accounts exist — login would issue the same kind of token for a real, persisted user ID instead of an auto-generated one, rather than requiring a different mechanism.
+
+The signing secret is configured the same way as other backend settings (see [Backend Configuration](#backend-configuration)): the `session_secret` YAML key or the `LTG_SESSION_SECRET` environment variable. If left unset, the server generates a random secret on startup — fine for local development, but it means sessions don't survive a restart, so any long-lived deployment should set it explicitly.
+
 ## Kubernetes Mode
 
 Kubernetes mode runs the complete containerized application inside a local `kind` cluster.
