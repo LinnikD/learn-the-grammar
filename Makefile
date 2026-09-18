@@ -20,6 +20,8 @@ FRONTEND_IMAGE := learn-the-grammar-frontend:dev
 	fmt fmt-check lint \
 	backend-fmt backend-fmt-check backend-lint \
 	frontend-fmt frontend-fmt-check frontend-lint \
+	generate generate-check \
+	backend-generate frontend-generate \
 	e2e
 
 
@@ -154,6 +156,22 @@ frontend-fmt-check:
 
 frontend-lint:
 	cd frontend && npm run lint
+
+generate: backend-generate frontend-generate
+
+backend-generate:
+	cd backend && go generate ./...
+
+frontend-generate:
+	cd frontend && npm run generate
+
+generate-check: generate
+	@changed=$$(git status --porcelain -- backend/internal/api/api.gen.go frontend/src/api/schema.gen.ts); \
+	if [ -n "$$changed" ]; then \
+		echo "Generated API code is out of date with api/openapi.yaml. Run 'make generate' and commit the result:"; \
+		echo "$$changed"; \
+		exit 1; \
+	fi
 
 e2e:
 	cd e2e && npm test

@@ -1,22 +1,19 @@
 import { useEffect, useState } from 'react'
-
-type HelloResponse = {
-  message: string
-}
+import { apiClient } from './api/client'
 
 function App() {
   const [message, setMessage] = useState('Loading...')
 
   useEffect(() => {
-    fetch('/api/hello')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`)
+    apiClient
+      .GET('/api/hello')
+      .then(({ data, error }) => {
+        if (error) {
+          throw new Error('failed to load message')
         }
 
-        return response.json() as Promise<HelloResponse>
+        setMessage(data.message)
       })
-      .then((data) => setMessage(data.message))
       .catch(() => setMessage('Failed to load message'))
   }, [])
 

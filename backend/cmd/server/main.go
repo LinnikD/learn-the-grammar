@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -14,29 +13,28 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/LinnikD/learn-the-grammar/backend/internal/api"
 	"github.com/LinnikD/learn-the-grammar/backend/internal/config"
 	"github.com/LinnikD/learn-the-grammar/backend/internal/middleware"
 )
 
 const shutdownTimeout = 10 * time.Second
 
-type helloResponse struct {
-	Message string `json:"message"`
+// server implements api.StrictServerInterface, the contract generated
+// from api/openapi.yaml.
+type server struct{}
+
+func (server) GetHello(_ context.Context, _ api.GetHelloRequestObject) (api.GetHelloResponseObject, error) {
+	return api.GetHello200JSONResponse{Message: "Learn The Grammar!"}, nil
 }
 
 func newMux() http.Handler {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /api/hello", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
+	api.HandlerFromMux(api.NewStrictHandler(server{}, nil), mux)
 
-		if err := json.NewEncoder(w).Encode(helloResponse{
-			Message: "Learn The Grammar!",
-		}); err != nil {
-			slog.Error("failed to encode response", "error", err)
-		}
-	})
-
+	// /health is infrastructure-only (Kubernetes probes) and deliberately
+	// not part of the OpenAPI contract consumed by the frontend.
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
