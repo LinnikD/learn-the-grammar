@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestServe_GracefulShutdownWaitsForInFlightRequest(t *testing.T) {
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatalf("failed to listen: %v", err)
-	}
+	require.NoError(t, err)
 
 	requestStarted := make(chan struct{})
 	releaseRequest := make(chan struct{})
@@ -65,18 +65,14 @@ func TestServe_GracefulShutdownWaitsForInFlightRequest(t *testing.T) {
 
 	select {
 	case err := <-requestDone:
-		if err != nil {
-			t.Fatalf("in-flight request failed during shutdown: %v", err)
-		}
+		require.NoError(t, err, "in-flight request failed during shutdown")
 	case <-time.After(2 * time.Second):
 		t.Fatal("in-flight request did not complete")
 	}
 
 	select {
 	case err := <-serveDone:
-		if err != nil {
-			t.Fatalf("serve returned error: %v", err)
-		}
+		require.NoError(t, err)
 	case <-time.After(2 * time.Second):
 		t.Fatal("serve did not return after shutdown")
 	}
@@ -84,9 +80,7 @@ func TestServe_GracefulShutdownWaitsForInFlightRequest(t *testing.T) {
 
 func TestServe_ReturnsPromptlyWithNoInFlightRequests(t *testing.T) {
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatalf("failed to listen: %v", err)
-	}
+	require.NoError(t, err)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -98,9 +92,7 @@ func TestServe_ReturnsPromptlyWithNoInFlightRequests(t *testing.T) {
 
 	select {
 	case err := <-done:
-		if err != nil {
-			t.Fatalf("serve returned error: %v", err)
-		}
+		require.NoError(t, err)
 	case <-time.After(time.Second):
 		t.Fatal("serve did not return promptly for an already-cancelled context")
 	}
