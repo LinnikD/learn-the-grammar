@@ -87,3 +87,17 @@ func TestLogging_SkipsHealthEndpoint(t *testing.T) {
 
 	assert.Zero(t, buf.Len(), "expected no log output for /health, got: %s", buf.String())
 }
+
+func TestLogging_RequestIDMatchesResponse(t *testing.T) {
+	var buf bytes.Buffer
+	logger := slog.New(slog.NewJSONHandler(&buf, nil))
+	handler := RequestID(Logging(logger)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	})))
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api/me", nil))
+	var entry map[string]any
+	require.NoError(t, json.Unmarshal(buf.Bytes(), &entry))
+	require.NotEmpty(t, rec.Header().Get("X-Request-ID"))
+	assert.Equal(t, rec.Header().Get("X-Request-ID"), entry["request_id"])
+}

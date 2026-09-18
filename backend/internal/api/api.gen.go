@@ -15,6 +15,13 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// ErrorResponse defines model for ErrorResponse.
+type ErrorResponse struct {
+	Code      string `json:"code"`
+	Message   string `json:"message"`
+	RequestId string `json:"request_id"`
+}
+
 // HelloResponse defines model for HelloResponse.
 type HelloResponse struct {
 	Message string `json:"message"`
@@ -24,6 +31,9 @@ type HelloResponse struct {
 type MeResponse struct {
 	UserId openapi_types.UUID `json:"user_id"`
 }
+
+// Error defines model for Error.
+type Error = ErrorResponse
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -198,6 +208,15 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	return m
 }
 
+type ErrorResponseHeaders struct {
+	XRequestID *string
+}
+type ErrorJSONResponse struct {
+	Body ErrorResponse
+
+	Headers ErrorResponseHeaders
+}
+
 type GetHelloRequestObject struct {
 }
 
@@ -219,6 +238,27 @@ func (response GetHello200JSONResponse) VisitGetHelloResponse(w http.ResponseWri
 	return err
 }
 
+type GetHellodefaultJSONResponse struct {
+	Body       ErrorResponse
+	Headers    ErrorResponseHeaders
+	StatusCode int
+}
+
+func (response GetHellodefaultJSONResponse) VisitGetHelloResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if response.Headers.XRequestID != nil {
+		w.Header().Set("X-Request-ID", fmt.Sprint(*response.Headers.XRequestID))
+	}
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type GetMeRequestObject struct {
 }
 
@@ -236,6 +276,27 @@ func (response GetMe200JSONResponse) VisitGetMeResponse(w http.ResponseWriter) e
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetMedefaultJSONResponse struct {
+	Body       ErrorResponse
+	Headers    ErrorResponseHeaders
+	StatusCode int
+}
+
+func (response GetMedefaultJSONResponse) VisitGetMeResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if response.Headers.XRequestID != nil {
+		w.Header().Set("X-Request-ID", fmt.Sprint(*response.Headers.XRequestID))
+	}
+	w.WriteHeader(response.StatusCode)
 	_, err := buf.WriteTo(w)
 	return err
 }

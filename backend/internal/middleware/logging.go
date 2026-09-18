@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/LinnikD/learn-the-grammar/backend/internal/apierror"
 )
 
 // skipLogging holds paths excluded from request logging, namely the
@@ -40,6 +42,7 @@ func Logging(logger *slog.Logger) func(http.Handler) http.Handler {
 			next.ServeHTTP(rec, r)
 
 			logger.Info("http request",
+				"request_id", apierror.RequestID(r.Context()),
 				"method", r.Method,
 				"path", r.URL.Path,
 				"status", rec.status,

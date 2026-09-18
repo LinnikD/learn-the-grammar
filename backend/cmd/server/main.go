@@ -12,12 +12,14 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/google/uuid"
 
 	"github.com/LinnikD/learn-the-grammar/backend/internal/api"
+	"github.com/LinnikD/learn-the-grammar/backend/internal/apierror"
 	"github.com/LinnikD/learn-the-grammar/backend/internal/config"
 	"github.com/LinnikD/learn-the-grammar/backend/internal/middleware"
 	"github.com/LinnikD/learn-the-grammar/backend/internal/session"
@@ -55,9 +57,19 @@ func (server) GetMe(ctx context.Context, _ api.GetMeRequestObject) (api.GetMeRes
 func newMux(sessionManager *session.Manager) http.Handler {
 	mux := http.NewServeMux()
 
-	api.HandlerWithOptions(api.NewStrictHandler(server{}, nil), api.StdHTTPServerOptions{
-		BaseRouter:  mux,
-		Middlewares: []api.MiddlewareFunc{middleware.Session(sessionManager)},
+	badRequest := func(w http.ResponseWriter, r *http.Request, err error) {
+		apierror.Write(w, r, http.StatusBadRequest, err)
+	}
+	strict := api.NewStrictHandlerWithOptions(server{}, nil, api.StrictHTTPServerOptions{
+		RequestErrorHandlerFunc: badRequest,
+		ResponseErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
+			apierror.Write(w, r, http.StatusInternalServerError, err)
+		},
+	})
+	api.HandlerWithOptions(strict, api.StdHTTPServerOptions{
+		ErrorHandlerFunc: badRequest,
+		BaseRouter:       mux,
+		Middlewares:      []api.MiddlewareFunc{middleware.Session(sessionManager)},
 	})
 
 	// /health is infrastructure-only (Kubernetes probes) and deliberately
@@ -67,8 +79,32 @@ func newMux(sessionManager *session.Manager) http.Handler {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	return mux
+	// Ask ServeMux which route matched. Its built-in 404/405 handlers have
+	// no pattern; preserve its Allow header while replacing their text body.
+	return middleware.RequestID(middleware.Logging(slog.Default())(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler, pattern := mux.Handler(r)
+		if pattern == "" && (r.URL.Path == "/api" || strings.HasPrefix(r.URL.Path, "/api/")) {
+			result := &routingErrorWriter{header: make(http.Header)}
+			handler.ServeHTTP(result, r)
+			if allow := result.header.Get("Allow"); allow != "" {
+				w.Header().Set("Allow", allow)
+			}
+			apierror.Write(w, r, result.status, nil)
+			return
+		}
+		mux.ServeHTTP(w, r)
+	})))
 }
+
+// routingErrorWriter captures only the standard mux's routing error response.
+type routingErrorWriter struct {
+	header http.Header
+	status int
+}
+
+func (w *routingErrorWriter) Header() http.Header         { return w.header }
+func (w *routingErrorWriter) WriteHeader(status int)      { w.status = status }
+func (w *routingErrorWriter) Write(b []byte) (int, error) { return len(b), nil }
 
 // resolveSessionSecret returns cfg's configured secret, or a freshly
 // generated random one if none was configured. A random secret is fine
@@ -148,7 +184,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	handler := middleware.Logging(logger)(newMux(sessionManager))
+	handler := newMux(sessionManager)
 
 	slog.Info("server listening", "addr", addr)
 

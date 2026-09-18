@@ -259,3 +259,8 @@ Delete the entire kind cluster:
 ```bash
 make cluster-down
 ```
+## API errors and request tracing
+
+API failures share a JSON error contract with `code`, `message`, and `request_id`.
+Responses include `X-Request-ID` for correlation with backend logs. See
+[API error conventions](backend/doc/api-errors.md) for backend and frontend behavior.

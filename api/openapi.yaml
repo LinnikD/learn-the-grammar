@@ -16,6 +16,8 @@ paths:
       operationId: getHello
       summary: Returns a greeting message.
       responses:
+        default:
+          $ref: "#/components/responses/Error"
         "200":
           description: OK
           content:
@@ -34,6 +36,8 @@ paths:
         registered account — it simply identifies the current browser
         across requests.
       responses:
+        default:
+          $ref: "#/components/responses/Error"
         "200":
           description: OK
           content:
@@ -42,7 +46,28 @@ paths:
                 $ref: "#/components/schemas/MeResponse"
 
 components:
+  responses:
+    Error:
+      description: Request failed.
+      headers:
+        X-Request-ID:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
   schemas:
+    ErrorResponse:
+      type: object
+      required: [code, message, request_id]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        request_id:
+          type: string
     HelloResponse:
       type: object
       required:

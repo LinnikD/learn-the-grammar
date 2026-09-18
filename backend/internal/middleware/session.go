@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/LinnikD/learn-the-grammar/backend/internal/apierror"
 	"github.com/LinnikD/learn-the-grammar/backend/internal/session"
 )
 
@@ -36,7 +37,7 @@ func Session(manager *session.Manager) func(http.Handler) http.Handler {
 				userID = uuid.NewString()
 
 				if err := issueSessionCookie(manager, w, userID); err != nil {
-					http.Error(w, "failed to create session", http.StatusInternalServerError)
+					apierror.Write(w, r, http.StatusInternalServerError, err)
 					return
 				}
 			}
