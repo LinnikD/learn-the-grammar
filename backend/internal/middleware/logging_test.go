@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLogging_PassesResponseThroughUnchanged(t *testing.T) {
@@ -24,12 +27,8 @@ func TestLogging_PassesResponseThroughUnchanged(t *testing.T) {
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
 
-	if rec.Code != http.StatusTeapot {
-		t.Errorf("status = %d, want %d", rec.Code, http.StatusTeapot)
-	}
-	if rec.Body.String() != "hello" {
-		t.Errorf("body = %q, want %q", rec.Body.String(), "hello")
-	}
+	assert.Equal(t, http.StatusTeapot, rec.Code)
+	assert.Equal(t, "hello", rec.Body.String())
 }
 
 func TestLogging_LogsRequestDetails(t *testing.T) {
@@ -46,22 +45,12 @@ func TestLogging_LogsRequestDetails(t *testing.T) {
 	handler.ServeHTTP(httptest.NewRecorder(), req)
 
 	var entry map[string]any
-	if err := json.Unmarshal(buf.Bytes(), &entry); err != nil {
-		t.Fatalf("failed to parse log output as JSON: %v\noutput: %s", err, buf.String())
-	}
+	require.NoError(t, json.Unmarshal(buf.Bytes(), &entry))
 
-	if entry["method"] != http.MethodPost {
-		t.Errorf("method = %v, want %v", entry["method"], http.MethodPost)
-	}
-	if entry["path"] != "/api/hello" {
-		t.Errorf("path = %v, want %v", entry["path"], "/api/hello")
-	}
-	if entry["status"] != float64(http.StatusCreated) {
-		t.Errorf("status = %v, want %v", entry["status"], http.StatusCreated)
-	}
-	if _, ok := entry["duration_ms"]; !ok {
-		t.Error("expected a duration_ms field in the log entry")
-	}
+	assert.Equal(t, http.MethodPost, entry["method"])
+	assert.Equal(t, "/api/hello", entry["path"])
+	assert.Equal(t, float64(http.StatusCreated), entry["status"])
+	assert.Contains(t, entry, "duration_ms")
 }
 
 func TestLogging_DefaultsStatusToOKWhenNotSet(t *testing.T) {
@@ -78,13 +67,9 @@ func TestLogging_DefaultsStatusToOKWhenNotSet(t *testing.T) {
 	handler.ServeHTTP(httptest.NewRecorder(), req)
 
 	var entry map[string]any
-	if err := json.Unmarshal(buf.Bytes(), &entry); err != nil {
-		t.Fatalf("failed to parse log output as JSON: %v", err)
-	}
+	require.NoError(t, json.Unmarshal(buf.Bytes(), &entry))
 
-	if entry["status"] != float64(http.StatusOK) {
-		t.Errorf("status = %v, want %v", entry["status"], http.StatusOK)
-	}
+	assert.Equal(t, float64(http.StatusOK), entry["status"])
 }
 
 func TestLogging_SkipsHealthEndpoint(t *testing.T) {
@@ -100,7 +85,5 @@ func TestLogging_SkipsHealthEndpoint(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	handler.ServeHTTP(httptest.NewRecorder(), req)
 
-	if buf.Len() != 0 {
-		t.Errorf("expected no log output for /health, got: %s", buf.String())
-	}
+	assert.Zero(t, buf.Len(), "expected no log output for /health, got: %s", buf.String())
 }
