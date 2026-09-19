@@ -1,5 +1,9 @@
 # General Workflow
 
+## GitHub Issues
+
+Use [doc/ISSUE_WORKFLOW.md](doc/ISSUE_WORKFLOW.md) for the shared process for finding, implementing, and closing GitHub Issues. Treat it as the source of truth for Issue identifiers, labels, status, and links between Issues and pull requests.
+
 For every task:
 
 Inspect the relevant parts of the repository before proposing changes.
