@@ -88,12 +88,13 @@ Keep comments and readme files up to date.
 
 ## Git and Pull Request Workflow
 
-For implementation tasks, use a dedicated Git branch unless explicitly instructed otherwise.
+For implementation tasks, use a dedicated Git branch and a dedicated Git worktree unless explicitly instructed otherwise. This lets multiple tasks proceed in parallel without interfering with each other's working tree state, even when the user has not mentioned that other work is in progress.
+
+For trivial, explicitly requested edits where no architectural or design decision is involved, working directly in the current checkout without a worktree is fine.
 
 After the implementation plan is approved and before modifying files:
 
 Confirm that the working tree does not contain unrelated uncommitted changes.
-Create a dedicated branch from the current intended base branch.
 Use a short descriptive branch name appropriate to the task.
 
 Examples:
@@ -101,6 +102,17 @@ Examples:
 feature/backend-config
 fix/frontend-api-error
 test/login-e2e
+
+Check `git worktree list` first to avoid creating a duplicate worktree for a branch that already has one.
+Create the branch and its worktree together in a single step, from the current intended base branch, so the main checkout stays on the base branch instead of switching to the new branch:
+
+    git worktree add -b <branch-name> .agents/worktrees/<branch-name> <base-branch>
+
+Example:
+
+    git worktree add -b feature/backend-config .agents/worktrees/feature/backend-config main
+
+Do all implementation work for the task inside that worktree directory, not in the main checkout.
 
 Do not discard, overwrite, stash, or commit unrelated user changes without explicit approval.
 
@@ -132,3 +144,7 @@ any known limitations or follow-up work.
 Do not merge the pull request unless explicitly instructed to do so.
 
 If branch creation, pushing, or pull request creation is not possible because of missing authentication, permissions, tools, or repository state, stop at the appropriate point and clearly report what remains to be done.
+
+After the pull request is merged, or if the task is abandoned, remove the worktree instead of leaving it behind:
+
+    git worktree remove .agents/worktrees/<branch-name>
