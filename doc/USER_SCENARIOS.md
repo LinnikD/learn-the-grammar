@@ -205,25 +205,28 @@ The User can see current progress without mistaking unavailable or not-yet-colle
 ## Scenario 8 — Update learning content
 
 **Role:** Admin  
-**Design surfaces:** Connected Sheet, Admin Console, import status
+**Design surfaces:** Connected `Topics` and `Meanings` tables, vocabulary-generation binary, Admin Console, import status
 
 ### Main path
 
-1. The Admin maintains Topics and reviewed Meaning rows in the connected Sheet. Vocabulary generation, if needed, is run outside the app.
-2. The Admin opens the **Admin Console** and selects **Update words from connected sheet**.
-3. The console shows that the import completed successfully.
-4. New or updated active content becomes available to Users according to their settings.
+1. The Admin adds a Topic to the `Topics` table with `active=true` and `filled=false`. The Admin does not add word rows manually.
+2. The Admin runs the vocabulary-generation binary outside the application. In one run, it uses the LLM to generate words for every active, unfilled Topic at every v1 Level and writes them to the `Meanings` table.
+3. After generating all Levels for a Topic successfully, the binary marks that Topic `filled=true`. Topics already filled or inactive are skipped on later runs.
+4. The Admin opens the **Admin Console** and selects **Update words from connected sheet**.
+5. The console shows that the import completed successfully.
+6. New or updated active content becomes available to Users according to their settings.
 
 ### Manage content through the Sheet
 
-- The Admin can add a Topic and import it.
-- The Admin can set a Meaning inactive; after the next successful import it is no longer shown to Users or used in new Lessons.
-- The Admin can reactivate an inactive Meaning by removing its inactive state in the Sheet and importing again.
-- The Admin can set a Topic inactive; after import, that Topic is no longer available to Users or new Lessons.
+- The Admin can add an active, unfilled Topic; it becomes available after vocabulary generation and import.
+- The Admin can set a Meaning row inactive; after the next successful import it is no longer shown to Users or used in new Lessons.
+- The Admin can reactivate an inactive Meaning by setting its `active` flag to `true` and importing again.
+- The Admin can set a Topic inactive; after import, that Topic and its words are no longer available to Users or new Lessons.
 
 ### Visible alternatives and errors
 
 - A Guest or non-Admin who attempts to open an Admin route sees a not-found page.
+- If LLM generation fails for a Topic or Level, the binary leaves the Topic unfilled, reports the failure, and the Admin can run it again.
 - If the Sheet cannot be accessed, the console shows an access error and the Admin can correct access and try again.
 - If the Sheet contains invalid data, the console reports the rows that must be corrected before the import can proceed.
 - If an import is interrupted, the console reports the interruption and the Admin can run it again.

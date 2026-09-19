@@ -54,8 +54,8 @@ A Lesson has three stages:
 ## 5. Glossary and core domain model
 
 - **Level:** one of `A1`, `A2`, or `B1`.
-- **Topic:** a vocabulary category. A Topic can be active or inactive.
-- **Meaning:** a language-independent concept. It belongs to exactly one Topic and one Level, and can be active or inactive.
+- **Topic:** a vocabulary category. A Topic has `active` and `filled` flags. `filled` means that the vocabulary-generation binary has successfully produced its v1 vocabulary rows for the Topic.
+- **Meaning:** a language-independent concept. It belongs to exactly one Topic and one Level, and can be active or inactive. A v1 Meaning is represented as one word row in the connected Sheet.
 - **Translation:** one language-specific expression of a Meaning. English, Russian, and Greek are stored for each Meaning in v1, with at most one Translation per language.
 - **Translation rating:** a User's progress for one specific Translation. It is either `unseen` or a numeric value in `[-1, +3]`.
 - **Grammar Concept:** a language-specific grammar item with an unlock Level.
@@ -293,13 +293,13 @@ An Admin can remove a Meaning from active use without deleting historical data.
 
 Removing a Topic from active use is non-destructive.
 
-- **FR-28.AC-1:** Deleting a Topic through the connected-Sheet workflow sets it to inactive rather than hard-deleting it.
+- **FR-28.AC-1:** Setting a Topic's `active` flag to `false` in the `Topics` table deactivates it rather than hard-deleting it.
 - **FR-28.AC-2:** An inactive Topic and all of its Meanings are excluded from User-facing dictionaries.
 - **FR-28.AC-3:** An inactive Topic and all of its Meanings are excluded from new Lesson generation.
 - **FR-28.AC-4:** User Topic settings, Translation ratings, and historical Lesson data are retained.
 - **FR-28.AC-5:** Topic deactivation does not alter existing unfinished Lesson snapshots.
 - **FR-28.AC-6:** Profile and progress calculations include only active Topics.
-- **FR-28.AC-7:** The Admin can add a Topic at any time by listing it in the connected Sheet and running a successful import.
+- **FR-28.AC-7:** The Admin can add a Topic at any time by listing it in the `Topics` table, generating its vocabulary, and running a successful import.
 - **FR-28.AC-8:** A newly imported active Topic follows FR-1's automatic-enable behavior for existing Users.
 
 ### Epic C — Grammar
@@ -543,18 +543,19 @@ The Profile reports mastery of the current main dictionary.
 
 ### Epic H — Administrative catalog tools
 
-### FR-20 — Vocabulary generation script
+### FR-20 — Vocabulary generation binary
 
-An administrative script can generate vocabulary rows for catalog experiments without regenerating an already populated Topic/Level set.
+The Admin enters only Topics in a connected Sheet. A separate administrative binary under `cmd/` uses the LLM to generate vocabulary rows for active, unfilled Topics.
 
-- **FR-20.AC-1:** The Admin lists Topics in the connected Sheet before generating vocabulary.
-- **FR-20.AC-2:** The script accepts a Topic and Level as generation scope.
-- **FR-20.AC-3:** Generated rows contain the Topic, Level, and exactly one English, one Russian, and one Greek Translation.
-- **FR-20.AC-4:** Generated rows are written to the connected Sheet for Admin review; the application does not automatically approve or semantically review them.
-- **FR-20.AC-5:** Before generation, the script checks whether the Sheet already contains one or more rows for the same `(Topic, Level)`.
-- **FR-20.AC-6:** If any such row exists, the script skips generation for that entire `(Topic, Level)` pair.
-- **FR-20.AC-7:** The script does not attempt semantic word-by-word duplicate detection.
-- **FR-20.AC-8:** Re-running the script against an unchanged Sheet does not append another generated set for an already populated `(Topic, Level)` pair.
+- **FR-20.AC-1:** The connected Sheet has a `Topics` table and a `Meanings` table. A Topic row contains a stable `topic_id` once imported, a Topic name, `active`, and `filled`. A Meaning row contains a stable `meaning_id` once imported, its Topic reference, Level, `active`, and exactly one English, one Russian, and one Greek Translation.
+- **FR-20.AC-2:** The Admin creates Topic rows manually; the binary creates Meaning rows. New Topics start with `filled=false`.
+- **FR-20.AC-3:** In one run, the binary finds every Topic with `active=true` and `filled=false` and requests LLM vocabulary for each v1 Level.
+- **FR-20.AC-4:** Generated Meaning rows contain the Topic reference, Level, `active=true`, and exactly one English, one Russian, and one Greek Translation. Before a new Topic has a `topic_id`, the rows link to its Topic row; after import, they use the assigned `topic_id`. The binary writes them to the `Meanings` table; it does not import them into the application database.
+- **FR-20.AC-5:** The binary sets a Topic's `filled=true` only after it has successfully generated and written vocabulary for all v1 Levels for that Topic.
+- **FR-20.AC-6:** The binary skips inactive Topics and Topics with `filled=true`.
+- **FR-20.AC-7:** If generation or writing fails for a Topic, the Topic remains `filled=false` and the binary reports the failed Topic and Level so it can be run again.
+- **FR-20.AC-8:** Re-running the binary does not append a duplicate generated set for a Topic and Level that already has generated rows.
+- **FR-20.AC-9:** The binary does not attempt semantic word-by-word duplicate detection.
 
 ### FR-34 — Admin route access
 
@@ -566,24 +567,24 @@ Administrative routes do not reveal themselves to non-Admins.
 - **FR-34.AC-4:** A rejected request does not disclose whether the Admin route exists.
 - **FR-34.AC-5:** The first Admin account is created during system setup and cannot be created through public sign-up.
 
-### FR-38 — Import and update catalog data from a Sheet
+### FR-38 — Import and update catalog data from Sheets
 
-An Admin can validate and apply Sheet data as idempotent catalog upserts.
+An Admin can validate and apply the connected `Topics` and `Meanings` tables as idempotent catalog upserts.
 
-- **FR-38.AC-1:** Before applying any row, the import validates the complete input for missing required fields, invalid Topics, invalid Levels, missing required Translations, duplicate same-language Translations, and malformed IDs.
+- **FR-38.AC-1:** Before applying any row, the import validates the complete input from both tables for missing required fields, invalid Topic references, invalid Levels, invalid `active` or `filled` flags, missing required Translations, duplicate same-language Translations, and malformed IDs.
 - **FR-38.AC-2:** If any row fails validation, the complete import fails before catalog changes are applied.
 - **FR-38.AC-3:** The failure reports enough row-level information for the Admin to correct the Sheet.
-- **FR-38.AC-4:** A row without a `meaning_id` represents a new Meaning.
-- **FR-38.AC-5:** Creating a new Meaning assigns a stable system `meaning_id` and associates it with the source row so a rerun does not create a duplicate.
-- **FR-38.AC-6:** A row containing a `meaning_id` that does not exist in the system is an error; the import does not create a Meaning with the supplied unknown ID.
-- **FR-38.AC-7:** A row containing an existing `meaning_id` updates that Meaning's Topic, Level, active state, and Translations as supplied.
+- **FR-38.AC-4:** A Topic row without a `topic_id` represents a new Topic. The first successful import assigns its stable system `topic_id` and writes it back to the `Topics` table.
+- **FR-38.AC-5:** A Topic row with an existing `topic_id` updates that Topic's name and `active` state. A supplied unknown `topic_id` is an error.
+- **FR-38.AC-6:** A Meaning row without a `meaning_id` represents a new Meaning. Creating it assigns a stable system `meaning_id` and writes it back to the `Meanings` table so a rerun does not create a duplicate.
+- **FR-38.AC-7:** A Meaning row containing an unknown `meaning_id` is an error. A row containing an existing `meaning_id` updates that Meaning's Topic, Level, active state, and Translations as supplied.
 - **FR-38.AC-8:** Translation and other historical User ratings remain attached to their stable entity IDs when catalog data changes.
-- **FR-38.AC-9:** Meaning identity follows `meaning_id`; v1 does not attempt semantic identity or version checks when an existing ID's content is changed.
+- **FR-38.AC-9:** Topic identity follows `topic_id` and Meaning identity follows `meaning_id`; v1 does not attempt semantic identity or version checks when an existing ID's content is changed.
 - **FR-38.AC-10:** After successful full-input validation, rows may be applied incrementally rather than in one all-or-nothing transaction.
 - **FR-38.AC-11:** If application stops partway through, already applied rows remain applied.
 - **FR-38.AC-12:** Re-running the same import resumes safely and does not duplicate rows already applied.
 - **FR-38.AC-13:** The final state after a successful rerun is the same as if the validated import had completed without interruption.
-- **FR-38.AC-14:** If the system cannot access the connected Sheet, no import is applied and the Admin sees an access error.
+- **FR-38.AC-14:** If the system cannot access either connected table, no import is applied and the Admin sees an access error.
 - **FR-38.AC-15:** If application is interrupted after processing has begun, the Admin sees an interruption result and can safely run the import again.
 - **FR-38.AC-16:** A successful import reports completion to the Admin.
 
