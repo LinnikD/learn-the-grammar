@@ -72,7 +72,7 @@ This inventory defines which v1 screens exist and their purpose. Detailed layout
 | Screen | Purpose |
 | --- | --- |
 | Login and sign-up | Sign in, create an account, and request password recovery. |
-| Settings | Select the interface language and Level, enable or disable active Topics, and explicitly save changes. |
+| Settings | Select the Level, enable or disable active Topics, and explicitly save changes. |
 | Start Lesson | Start a Lesson; when an unfinished Lesson exists, continue it or end it and start another. |
 | Lesson | Show source sentences, one answer field per sentence, contextual word hints, and Submit. |
 | Lesson result | Show criterion scores, overall score, advice, and a correct/reference/alternative version for every sentence. |
