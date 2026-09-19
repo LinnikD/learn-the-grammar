@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Caveat:wght@700&display=swap">
+<style>
+:root{
+  --bg:#F6F5F1; --surface:#FFFFFF; --border:#E3E1DA;
+  --text:#201F1C; --text-secondary:#6B6862;
+  --accent:#2C5F8A; --accent-dark:#1F4763; --accent-soft:#E8F0F6;
+  --gold:#C99A3B;
+  --radius:12px;
+  --font-display:'Sora', system-ui, sans-serif;
+  --font-body:'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-hand:'Caveat', cursive;
+}
+body{margin:0;font-family:var(--font-body);background:var(--bg);color:var(--text);}
+h1,h2,h3{font-family:var(--font-display);margin:0;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{color:var(--accent-dark);}
+.nav{height:72px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 40px;justify-content:space-between;box-sizing:border-box;}
+.nav-left{display:flex;align-items:center;gap:40px;}
+.logo-mark{display:flex;flex-direction:column;}
+.logo-text{font-family:var(--font-hand);font-weight:700;font-size:28px;color:var(--accent-dark);line-height:1;}
+.logo-swash{display:block;margin-top:-3px;}
+.nav-links{display:flex;gap:28px;}
+.nav-link{font-size:14px;font-weight:600;color:var(--text-secondary);padding:8px 0;border-bottom:2px solid transparent;}
+.nav-link.active{color:var(--text);border-bottom-color:var(--accent);}
+.nav-right{display:flex;align-items:center;gap:14px;}
+.icon-btn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--surface);color:var(--text-secondary);flex-shrink:0;}
+.icon-btn.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-dark);}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);}
+.label{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-secondary);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-body);font-weight:700;font-size:15px;border-radius:10px;padding:14px 28px;cursor:pointer;border:none;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:var(--accent-dark);}
+.btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid var(--border);font-size:14px;padding:10px 16px;font-weight:600;border-radius:8px;cursor:pointer;font-family:var(--font-body);}
+.btn-ghost:hover{color:var(--text);background:var(--accent-soft);}
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--text-secondary);}
+.back-link:hover{color:var(--text);}
+
+.level-row{display:flex;gap:16px;}
+.level-option{flex:1;text-align:left;padding:18px 20px;border-radius:12px;border:2px solid var(--border);background:var(--surface);cursor:pointer;font-family:var(--font-body);}
+.level-option.selected{border-color:var(--accent);background:var(--accent-soft);}
+.level-code{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text);}
+.level-name{font-size:13px;color:var(--text-secondary);margin-top:2px;}
+
+.topics-summary{padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.topics-grid{display:grid;grid-template-columns:repeat(3,1fr);column-gap:32px;padding:4px 26px 22px;}
+.topics-grid[hidden]{display:none;}
+.topic-row{padding:13px 0;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--border);}
+.topic-name{font-size:15px;font-weight:600;}
+.topic-meta{font-size:12px;color:var(--text-secondary);margin-top:1px;}
+.topic-meta.empty{color:#B3AEA4;font-style:italic;}
+
+.toggle{width:40px;height:24px;border-radius:999px;position:relative;flex-shrink:0;border:none;cursor:pointer;padding:0;}
+.toggle.on{background:var(--accent);}
+.toggle.off{background:var(--border);}
+.toggle-knob{width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:3px;box-shadow:0 1px 2px rgba(32,31,28,.2);}
+.toggle.on .toggle-knob{left:19px;}
+.toggle.off .toggle-knob{left:3px;}
+
+.chevron{transition:transform .15s;}
+.chevron.up{transform:rotate(180deg);}
+.footnote[hidden]{display:none;}
+</style>
+</head>
+<body>
+<div style="width:1440px;min-height:1000px;box-sizing:border-box;background:var(--bg);display:flex;flex-direction:column;font-family:var(--font-body);">
+
+  <nav class="nav">
+    <div class="nav-left">
+      <div class="logo-mark">
+        <span class="logo-text">Learn the Grammar</span>
+        <svg class="logo-swash" width="150" height="8" viewBox="0 0 300 18"><path d="M4 8c40-10 220-10 292 4" stroke="var(--gold)" stroke-width="4" stroke-linecap="round" fill="none"/></svg>
+      </div>
+      <div class="nav-links">
+        <a class="nav-link" href="StartLesson.html">Lesson</a>
+        <a class="nav-link" href="Dictionary.html">Dictionary</a>
+        <a class="nav-link" href="Profile.html">Profile</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <a class="icon-btn active" href="Settings.html" aria-label="Settings" title="Settings">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      </a>
+      <div class="avatar">DN</div>
+    </div>
+  </nav>
+
+  <main style="flex-grow:1;display:flex;justify-content:center;padding:56px 40px 80px;">
+    <div style="width:100%;max-width:900px;display:flex;flex-direction:column;gap:28px;">
+
+      <div>
+        <a class="back-link" href="StartLesson.html">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          Back to lessons
+        </a>
+        <h1 style="font-size:32px;font-weight:700;margin-top:12px;">Settings</h1>
+        <p style="font-size:15px;color:var(--text-secondary);margin-top:8px;">Choose your level and pick the topics you want lessons to draw from.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;max-width:760px;">
+        <span class="label">Language level</span>
+        <div class="level-row">
+          <button type="button" class="level-option">
+            <div class="level-code">A1</div>
+            <div class="level-name">Beginner</div>
+          </button>
+          <button type="button" class="level-option selected">
+            <div class="level-code">A2</div>
+            <div class="level-name">Elementary</div>
+          </button>
+          <button type="button" class="level-option">
+            <div class="level-code">B1</div>
+            <div class="level-name">Intermediate</div>
+          </button>
+        </div>
+        <p style="font-size:13px;color:var(--text-secondary);margin:0;">Changing your level updates the words and grammar used in lessons. Word ratings and your average score are kept.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <span class="label">Topics</span>
+
+        <div class="card">
+          <div class="topics-summary">
+            <div>
+              <div class="topic-name">108 topics available</div>
+              <div class="topic-meta">92 enabled &middot; all topics are on by default &mdash; turn off any that don&rsquo;t interest you</div>
+            </div>
+            <button type="button" id="toggle-topics-btn" class="btn-ghost" style="display:flex;align-items:center;gap:6px;flex-shrink:0;" aria-expanded="false">
+              <span id="toggle-topics-label">Manage topics</span>
+              <svg id="toggle-topics-chevron" class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+          </div>
+
+          <div id="topics-grid" class="topics-grid" hidden>
+            <div class="topic-row"><div><div class="topic-name">Family</div><div class="topic-meta">38 words</div></div><button type="button" class="toggle on" aria-pressed="true" aria-label="Family"><span class="toggle-knob"></span></button></div>
+            <div class="topic-row"><div><div class="topic-name">Travel</div><div class="topic-meta">45 words</div></div><button type="button" class="toggle on" aria-pressed="true" aria-label="Travel"><span class="toggle-knob"></span></button></div>
+            <div class="topic-row"><div><div class="topic-name">Food</div><div class="topic-meta">51 words</div></div><button type="button" class="toggle on" aria-pressed="true" aria-label="Food"><span class="toggle-knob"></span></button></div>
+            <div class="topic-row"><div><div class="topic-name">Work</div><div class="topic-meta">29 words</div></div><button type="button" class="toggle on" aria-pressed="true" aria-label="Work"><span class="toggle-knob"></span></button></div>
+            <div class="topic-row"><div><div class="topic-name">Nature</div><div class="topic-meta">33 words</div></div><button type="button" class="toggle on" aria-pressed="true" aria-label="Nature"><span class="toggle-knob"></span></button></div>
+            <div class="topic-row"><div><div class="topic-name">Health</div><div class="topic-meta">24 words</div></div><button type="button" class="toggle on" aria-pressed="true" aria-label="Health"><span class="toggle-knob"></span></button></div>
+            <div class="topic-row"><div><div class="topic-name">Shopping</div><div class="topic-meta">27 words</div></div><button type="button" class="toggle off" aria-pressed="false" aria-label="Shopping"><span class="toggle-knob"></span></button></div>
+            <div class="topic-row"><div><div class="topic-name">Sport</div><div class="topic-meta">19 words</div></div><button type="button" class="toggle on" aria-pressed="true" aria-label="Sport"><span class="toggle-knob"></span></button></div>
+            <div class="topic-row"><div><div class="topic-name">Music</div><div class="topic-meta">15 words</div></div><button type="button" class="toggle on" aria-pressed="true" aria-label="Music"><span class="toggle-knob"></span></button></div>
+            <div class="topic-row"><div><div class="topic-name">Cinema</div><div class="topic-meta">12 words</div></div><button type="button" class="toggle off" aria-pressed="false" aria-label="Cinema"><span class="toggle-knob"></span></button></div>
+            <div class="topic-row"><div><div class="topic-name">Weather</div><div class="topic-meta">21 words</div></div><button type="button" class="toggle on" aria-pressed="true" aria-label="Weather"><span class="toggle-knob"></span></button></div>
+            <div class="topic-row"><div><div class="topic-name">Business</div><div class="topic-meta">18 words</div></div><button type="button" class="toggle on" aria-pressed="true" aria-label="Business"><span class="toggle-knob"></span></button></div>
+            <div class="topic-row"><div><div class="topic-name">Technology</div><div class="topic-meta">14 words</div></div><button type="button" class="toggle off" aria-pressed="false" aria-label="Technology"><span class="toggle-knob"></span></button></div>
+            <div class="topic-row"><div><div class="topic-name">Art</div><div class="topic-meta">16 words</div></div><button type="button" class="toggle on" aria-pressed="true" aria-label="Art"><span class="toggle-knob"></span></button></div>
+            <div class="topic-row"><div><div class="topic-name">History</div><div class="topic-meta">9 words</div></div><button type="button" class="toggle on" aria-pressed="true" aria-label="History"><span class="toggle-knob"></span></button></div>
+            <div class="topic-row"><div><div class="topic-name">Science</div><div class="topic-meta">11 words</div></div><button type="button" class="toggle on" aria-pressed="true" aria-label="Science"><span class="toggle-knob"></span></button></div>
+            <div class="topic-row"><div><div class="topic-name">Holidays</div><div class="topic-meta">22 words</div></div><button type="button" class="toggle on" aria-pressed="true" aria-label="Holidays"><span class="toggle-knob"></span></button></div>
+            <div class="topic-row"><div><div class="topic-name">Politics</div><div class="topic-meta empty">No words yet at A2</div></div><button type="button" class="toggle off" aria-pressed="false" aria-label="Politics"><span class="toggle-knob"></span></button></div>
+          </div>
+          <div id="topics-footnote" class="footnote" style="padding:0 26px 22px;" hidden>
+            <p style="font-size:13px;color:var(--text-secondary);margin:0;">Showing 18 of 108. Disabled topics are skipped in lessons &mdash; word ratings are kept, so they&rsquo;re still there if you turn a topic back on.</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <a class="btn btn-primary" href="StartLesson.html">Save changes</a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  // Reference logic: collapsible topics section (starts collapsed). Individual
+  // topic toggles here are visual only — wire them to real state in the app.
+  var toggleBtn = document.getElementById('toggle-topics-btn');
+  var toggleLabel = document.getElementById('toggle-topics-label');
+  var chevron = document.getElementById('toggle-topics-chevron');
+  var grid = document.getElementById('topics-grid');
+  var footnote = document.getElementById('topics-footnote');
+  var expanded = false;
+
+  toggleBtn.addEventListener('click', function () {
+    expanded = !expanded;
+    grid.hidden = !expanded;
+    footnote.hidden = !expanded;
+    toggleLabel.textContent = expanded ? 'Hide topics' : 'Manage topics';
+    chevron.classList.toggle('up', expanded);
+    toggleBtn.setAttribute('aria-expanded', String(expanded));
+  });
+
+  // Individual topic toggles (visual state only, for the mockup)
+  document.querySelectorAll('.topic-row .toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var isOn = btn.classList.contains('on');
+      btn.classList.toggle('on', !isOn);
+      btn.classList.toggle('off', isOn);
+      btn.setAttribute('aria-pressed', String(!isOn));
+    });
+  });
+
+  // Level picker (visual state only)
+  document.querySelectorAll('.level-option').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.level-option').forEach(function (b) { b.classList.remove('selected'); });
+      btn.classList.add('selected');
+    });
+  });
+</script>
+</body>
+</html>
