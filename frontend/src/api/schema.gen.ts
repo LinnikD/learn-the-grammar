@@ -45,6 +45,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        ErrorResponse: {
+            code: string;
+            message: string;
+            request_id: string;
+        };
         HelloResponse: {
             message: string;
         };
@@ -53,7 +58,18 @@ export interface components {
             user_id: string;
         };
     };
-    responses: never;
+    responses: {
+        /** @description Request failed. */
+        Error: {
+            headers: {
+                "X-Request-ID"?: string;
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorResponse"];
+            };
+        };
+    };
     parameters: never;
     requestBodies: never;
     headers: never;
@@ -79,6 +95,7 @@ export interface operations {
                     "application/json": components["schemas"]["HelloResponse"];
                 };
             };
+            default: components["responses"]["Error"];
         };
     };
     getMe: {
@@ -99,6 +116,7 @@ export interface operations {
                     "application/json": components["schemas"]["MeResponse"];
                 };
             };
+            default: components["responses"]["Error"];
         };
     };
 }
