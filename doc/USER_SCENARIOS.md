@@ -1,145 +1,247 @@
-# User scenarios: Language Grammar & Writing Trainer
+# User scenarios: Learn the Grammar
+
+**Purpose:** This document complements the PRD. It describes the visible journeys, screens, decisions, and recovery paths that designers and UI implementation agents need. The PRD remains the source of truth for domain rules, calculations, LLM contracts, and catalog/import behavior.
+
+## How to use this document
+
+Use each scenario to design the stated screens and their visible states. Do not introduce behavior that conflicts with the linked functional requirements.
+
+This document intentionally does **not** repeat:
+
+- rating formulas, clamps, or how multiple word occurrences are aggregated;
+- LLM prompts, response schemas, retries, or usage-detection rules;
+- deployment configuration values and import implementation details;
+- the vocabulary-selection algorithm in `FR-8`, which remains blocked in the PRD.
 
 ## Roles
 
-There are three roles. A person moves from one to the next by signing up and by being given admin rights.
+| Role | Visible access |
+| --- | --- |
+| Guest | Can use sign-in, sign-up, and password-recovery screens. Cannot enter lessons. |
+| User | Can use Settings, Start Lesson, Lesson, Lesson Result, Dictionary, and Profile. |
+| Admin | Has all User access and can open the Admin Console. |
 
-| Role | Who | What they can do |
-| --- | --- | --- |
-| Guest | Someone who is not logged in. | Open the login and sign up screen. Cannot take a lesson. |
-| User | A logged-in account. | Use the user app: settings, start lesson, lesson, lesson result, dictionary and profile. |
-| Admin | A logged-in account with admin rights. | Everything a User can do, plus the admin console. |
+The first Admin account is created during system setup. It cannot be created through public sign-up.
 
-The first admin is created when the system is set up, not through the app.
+## Scenario 1 — Sign up and first-time setup
 
-## How to read this document
+**Role:** Guest who becomes a User  
+**Design surfaces:** Sign up, Settings, Start Lesson
 
-These scenarios describe what a person sees and does, step by step, using the roles above. They cover only what is visible to the person; the internal logic (how words are chosen, what the LLM receives, how ratings change) is in the PRD and is not repeated here. Each scenario lists the requirements (FR) it covers.
+### Main path
 
-Each scenario has the same parts:
+1. The Guest opens the app and chooses **Sign up**.
+2. The Guest enters an email address and password and submits the form.
+3. The account is created and the new User is signed in automatically.
+4. The app opens **Settings**. `A1` is selected and all currently active Topics are enabled.
+5. The User may change the Level and enabled Topics.
+6. The User selects **Save**.
+7. The app opens **Start Lesson**.
 
-- **Role:** who does it.
-- **Before:** the conditions that must be true.
-- **Steps:** the main path.
-- **Alternatives and errors:** what happens when the main path is not followed.
-- **Result:** what is true afterwards.
-- **Requirements:** the FR IDs from the PRD.
+### Visible alternatives and errors
 
-Where the PRD does not say what should happen, the scenario says so and points to the list of gaps at the end. Gaps are questions for the author, not decisions.
+- Invalid registration details show a validation error and keep the User on the sign-up screen.
+- If the User leaves Settings before the first successful Save, the next sign-in returns to Settings.
+- If the User tries to start a Lesson but has no eligible vocabulary, the app explains that a Lesson cannot be started and offers navigation to Settings.
 
-## Scenario 1: First launch
+### Result
 
-**Role:** a Guest who becomes a User.
+The User has completed onboarding and has saved learning settings.
 
-**Before:** the person has no account. The admin has already added topics and generated words (see Scenario 4).
+**Requirements:** FR-1, FR-2, FR-26, FR-29, FR-30, FR-31
 
-**Steps**
+## Scenario 2 — Sign in and recover access
 
-1. The Guest opens the site and sees the login and sign up screen.
-2. The Guest chooses to sign up and enters an email and a password. No email confirmation is needed.
-3. The account is created and the person is signed in automatically.
-4. After the first sign in, which happens right after sign up, the person is taken to the Settings screen to choose the language level (A1, A2 or B1). A1 is selected by default. All topics are enabled by default, and the User can turn off the ones they do not want.
-5. The User confirms the settings and goes to the Start lesson screen.
-6. The User starts the first lesson (Scenario 2).
+**Role:** Guest or returning User  
+**Design surfaces:** Sign in, Password recovery, Set new password, Settings or Start Lesson
 
-**Alternatives and errors**
+### Sign in
 
-- **No words available.** If the main dictionary has no words (for example all topics are turned off, or the admin has not generated words for the chosen level), the lesson does not start. The User is offered to set up topics and returns to Settings (FR-30).
-- **Email already registered, invalid email, weak password.** Sign up fails with an error message. The only password rule is a length of more than 8 characters.
-- **The User skips Settings.** The default level is A1, so a level is always set; skipping Settings does not block a lesson.
+1. The Guest opens **Sign in** and enters email and password.
+2. After successful sign-in, the app opens Settings if onboarding is incomplete; otherwise it opens Start Lesson.
 
-**Result:** a signed-in User with a level and a set of enabled topics, ready to start a lesson.
+### Password recovery
 
-**Requirements:** FR-29, FR-26, FR-1, FR-2, FR-30.
+1. The Guest selects **Forgot password**.
+2. The Guest enters the account email and requests a recovery link.
+3. After opening a valid recovery link, the User enters and confirms a new password.
+4. The app confirms that access has been restored and allows the User to sign in with the new password.
 
-## Scenario 2: Regular lesson
+### Visible alternatives and errors
 
-**Role:** User.
+- Incorrect sign-in credentials show an error and do not sign the person in.
+- An invalid, expired, or already-used recovery link shows an error and offers the option to request a new link.
+- A new password that does not meet validation rules is rejected on the reset screen.
 
-**Before:** the User is signed in, the main dictionary has words, and there is no unfinished lesson (or the User chose to start a new one, see Scenario 3).
+### Result
 
-**Steps**
+The returning User either has an authenticated session or has a clear next action to recover access.
 
-1. On the Start lesson screen the User starts a new lesson. A loader blocks the screen until the sentences are ready.
-2. The Lesson screen shows 5 sentences in the User's native language, with a field for each translation.
-3. The User translates each sentence into the target language.
-4. Optional: the User asks for a hint on one word of their choice in a sentence and sees its translation. Hints never change the score.
-5. The User submits all translations. A loader blocks the screen until the result is ready.
-6. The Lesson result screen shows the score for each criterion (grammar, spelling, vocabulary and meaning), the overall score, up to 3 short pieces of advice, and a correct or alternative version of every sentence, even those that were right.
-7. The dictionary and the profile reflect the result of the lesson.
+**Requirements:** FR-1, FR-26, FR-36, FR-37
 
-**Alternatives and errors**
+## Scenario 3 — Start and complete a Lesson
 
-- **No words available.** The lesson does not start; see Scenario 1.
-- **LLM fails while writing the sentences.** The User sees the error message "Oops, something went wrong" (FR-33). The User can press the start button again.
-- **LLM fails while checking the translations.** The User sees the same error message. The form is not reset: the typed translations stay, and the User can submit again.
-- **The User leaves before submitting.** See Scenario 3.
+**Role:** User  
+**Design surfaces:** Start Lesson, loading state, Lesson, Hint, Lesson Result
 
-**Result:** the lesson is finished, and the dictionary and the profile reflect its result.
+### Main path
 
-**Requirements:** FR-11, FR-10, FR-12, FR-13, FR-33.
+1. The User opens **Start Lesson** and selects **Start lesson**.
+2. The screen shows a loading state while the Lesson is prepared.
+3. The **Lesson** screen shows the generated Russian source sentences and one Greek answer field for each sentence.
+4. The User enters any number of answers. Empty fields remain valid answers to submit.
+5. Optional: the User selects a source word and requests a hint. The app shows a target-language dictionary/base form, not a completed sentence.
+6. The User selects **Submit**.
+7. The screen shows a loading state while answers are graded.
+8. The **Lesson Result** screen shows Grammar, Spelling, and Vocabulary and meaning scores; the overall score; zero to three advice items; and a reference or alternative Greek sentence for every source sentence.
 
-## Scenario 3: Unfinished lesson
+### Visible alternatives and errors
 
-**Role:** User.
+- If preparation fails, the app shows `Oops, something went wrong` and lets the User try starting again.
+- If grading fails, the app shows the same error and returns the User to the Lesson with entered answers intact, ready to submit again.
+- While preparation or grading is running, the relevant action is unavailable to prevent a second request.
 
-**Before:** the User started a lesson and left before submitting the translations, for example by closing the browser or opening another screen.
+### Result
 
-**Steps**
+The User can review the completed Lesson. Dictionary and Profile views reflect the completed result.
 
-1. The sentences and the translations typed so far are saved. How saving works is decided at implementation.
-2. Later the User opens the Start lesson screen.
-3. The screen shows that an unfinished lesson exists and offers two actions: continue it, or end it without a result and start a new one.
-4. **Continue.** The Lesson screen opens with the same sentences and the translations typed so far. The User goes on from step 3 of Scenario 2.
-5. **End and start a new one.** The old lesson is closed without a result. It changes no ratings and no scores. A new lesson starts from step 1 of Scenario 2.
+**Requirements:** FR-9, FR-10, FR-11, FR-12, FR-13, FR-14, FR-15, FR-25, FR-33
 
-**Alternatives and errors**
+## Scenario 4 — Resume or discard an unfinished Lesson
 
-- **Settings changed in between.** If the User changes the level or turns a topic off while a lesson is unfinished, that lesson does not change.
+**Role:** User  
+**Design surfaces:** Start Lesson, Resume choice, Lesson
 
-**Result:** either the old lesson continues, or it is closed with no effect and a new one begins.
+### Main path
 
-**Requirements:** FR-32.
+1. The User leaves a Lesson before it has a result, then later opens **Start Lesson**.
+2. The screen explains that an unfinished Lesson exists and offers **Continue** and **End and start new**.
+3. If the User chooses **Continue**, the same source sentences and the latest saved answers open in the Lesson screen.
+4. If the User chooses **End and start new**, the unfinished Lesson is discarded without a result, and the app begins a new Lesson.
 
-## Scenario 4: Admin fills the content
+### Visible alternatives and errors
 
-**Role:** Admin.
+- Changing the current Level or Topic settings in the meantime does not change the unfinished Lesson the User resumes.
+- If grading previously failed, the User can return to the same saved answers and submit again.
 
-**Before:** the system is set up and the first admin exists. The Admin is signed in and opens the admin console. Only accounts with admin rights can open it.
+### Result
 
-**Steps**
+The User either resumes the same unfinished work or intentionally starts fresh. Discarding does not produce a Lesson Result.
 
-1. The Admin creates a Google Sheet that the system can read and lists the topics on the topics sheet.
-2. The Admin runs the word generation script, outside the app. It fills another sheet with meanings and translations in English, Russian and Greek for each topic and level.
-3. The Admin reviews the result in the sheet. To ban a wrong meaning, the Admin edits the sheet.
-4. In the admin console the Admin presses "Update words from connected sheet". All meanings from the sheet are loaded into the system, and the ids given to new meanings are written back into the sheet.
-5. Users can now start lessons with the new words.
+**Requirements:** FR-32, FR-33
 
-**Alternatives and errors**
+## Scenario 5 — Change learning settings
 
-- **A non-admin opens the admin console.** It is available only to accounts with admin rights; everyone else gets a 404 page.
-- **Loading the sheet again.** A row with an id updates the existing meaning and keeps the users' ratings; a row without an id is added as a new meaning.
-- **The script is run again for a topic and level that already have words.** Duplicates are skipped; the script must be idempotent.
-- **The sheet cannot be read, or loading fails.** If the system has no access to the sheet, the Admin sees an error. If loading stops partway, the Admin sees a message that it was interrupted. Loading can simply be started again: it is idempotent, so nothing is duplicated.
-- **Banning a meaning or deleting a topic.** Both are done through the sheet. How they are marked there is an open question in the PRD.
+**Role:** User  
+**Design surfaces:** Settings, Dictionary, Start Lesson, Profile
 
-**Result:** topics and meanings exist, so Users can start lessons.
+### Main path
 
-**Requirements:** FR-34, FR-20, FR-21, FR-38, FR-23, FR-28.
+1. The User opens **Settings**.
+2. The User selects `A1`, `A2`, or `B1` and enables or disables active Topics.
+3. The User selects **Save**.
+4. The app confirms the saved settings. The Dictionary and future Lessons use the updated selection.
 
-## Scenarios not yet described
+### Visible alternatives and errors
 
-These scenarios are TBD. Do not implement them without an explicit discussion with the author.
+- Leaving without Save does not apply the changes.
+- Existing ratings and completed-Lesson history remain available after changing Level or Topics.
+- An unfinished Lesson remains unchanged and can still be resumed from Start Lesson.
 
-| Scenario | What it would cover | Requirements |
-| --- | --- | --- |
-| Sign in | A returning User signs in; a wrong password shows an error; password recovery through a link sent to the email. | FR-26, FR-36, FR-37 |
-| Change settings | The User changes the level or turns topics on and off; what this does to the dictionary and the ratings. | FR-1, FR-2, FR-31 |
-| Browse the dictionary | The User opens the dictionary and its tabs (main dictionary, disabled topics, higher levels); words without a rating. | FR-3, FR-4, FR-5, FR-22 |
-| View the profile | The User sees the average score of the last N lessons with a breakdown, vocabulary progress and grammar concept ratings. | FR-16, FR-17, FR-35 |
-| Ban a meaning or delete a topic | The Admin removes a meaning or a topic through the sheet; how it is marked there is an open question in the PRD. | FR-23, FR-28 |
-| Add a language | Postponed. A new translation is produced for the existing meanings. | FR-19 |
+### Result
 
-## Gaps found while writing
+Future lesson content and the current main dictionary match the saved settings.
 
-There are no open gaps at the moment. Questions that come up while writing more scenarios are listed here.
+**Requirements:** FR-1, FR-2, FR-4, FR-6, FR-31, FR-32
+
+## Scenario 6 — Browse the Dictionary
+
+**Role:** User  
+**Design surfaces:** Dictionary tabs or grouped sections
+
+### Main path
+
+1. The User opens **Dictionary**.
+2. The User can browse the current main dictionary, vocabulary from disabled Topics, and vocabulary above the current Level in separate sections.
+3. Each visible Translation shows either `unseen` or its personal numeric rating.
+4. The User changes Settings and returns to Dictionary; the groups update to match the saved Level and Topic choices.
+
+### Visible alternatives and errors
+
+- `unseen` is visually distinct from numeric `0`.
+- Inactive Meanings and inactive Topics are not shown.
+
+### Result
+
+The User can understand which vocabulary is currently available for learning and which vocabulary is outside the current main dictionary.
+
+**Requirements:** FR-3, FR-4, FR-5, FR-7, FR-18, FR-22, FR-23, FR-28
+
+## Scenario 7 — View progress in the Profile
+
+**Role:** User  
+**Design surfaces:** Profile
+
+### Main path
+
+1. The User opens **Profile**.
+2. The Profile shows the recent overall average and separate averages for Grammar, Spelling, and Vocabulary and meaning.
+3. The Profile shows vocabulary progress for the current main dictionary.
+4. The Profile shows the User's ratings for Grammar Concepts unlocked at the current Level.
+5. The Profile also shows the current learning settings.
+
+### Visible alternatives and empty states
+
+- Before the User completes a Lesson, score areas show a no-data state rather than a score of zero.
+- If the current main dictionary is empty, vocabulary progress is shown as `0%`.
+- Grammar Concepts above the current Level are not shown.
+
+### Result
+
+The User can see current progress without mistaking unavailable or not-yet-collected data for poor performance.
+
+**Requirements:** FR-16, FR-17, FR-27, FR-31, FR-35
+
+## Scenario 8 — Update learning content
+
+**Role:** Admin  
+**Design surfaces:** Connected Sheet, Admin Console, import status
+
+### Main path
+
+1. The Admin maintains Topics and reviewed Meaning rows in the connected Sheet. Vocabulary generation, if needed, is run outside the app.
+2. The Admin opens the **Admin Console** and selects **Update words from connected sheet**.
+3. The console shows that the import completed successfully.
+4. New or updated active content becomes available to Users according to their settings.
+
+### Manage content through the Sheet
+
+- The Admin can add a Topic and import it.
+- The Admin can set a Meaning inactive; after the next successful import it is no longer shown to Users or used in new Lessons.
+- The Admin can reactivate an inactive Meaning by removing its inactive state in the Sheet and importing again.
+- The Admin can set a Topic inactive; after import, that Topic is no longer available to Users or new Lessons.
+
+### Visible alternatives and errors
+
+- A Guest or non-Admin who attempts to open an Admin route sees a not-found page.
+- If the Sheet cannot be accessed, the console shows an access error and the Admin can correct access and try again.
+- If the Sheet contains invalid data, the console reports the rows that must be corrected before the import can proceed.
+- If an import is interrupted, the console reports the interruption and the Admin can run it again.
+
+### Result
+
+The Admin has a clear, recoverable path to make reviewed catalog content available without exposing administrative controls to other users.
+
+**Requirements:** FR-20, FR-21, FR-23, FR-28, FR-34, FR-38
+
+## Design coverage checklist
+
+Before a design or UI implementation is considered complete, it must include:
+
+- primary, loading, validation-error, empty, and recovery states named in the relevant scenario;
+- explicit first-time Settings Save and unfinished-Lesson choice states;
+- a clear distinction between `unseen`, numeric ratings, no-data scores, and `0%` vocabulary progress;
+- user-safe error states that retain entered Lesson answers after grading failure;
+- no visible Admin navigation or route disclosure for Guests and non-Admins.
+
+For rules that are not visible in a particular journey, consult the PRD rather than extending this document.
