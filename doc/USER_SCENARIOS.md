@@ -17,11 +17,30 @@ This document intentionally does **not** repeat:
 
 | Role | Visible access |
 | --- | --- |
-| Guest | Can use sign-in, sign-up, and password-recovery screens. Cannot enter lessons. |
+| Guest | Can use the interface-language selector and sign-in, sign-up, and password-recovery screens. Cannot enter lessons. |
 | User | Can use Settings, Start Lesson, Lesson, Lesson Result, Dictionary, and Profile. |
 | Admin | Has all User access and can open the Admin Console. |
 
 The first Admin account is created during system setup. It cannot be created through public sign-up.
+
+## Scenario 0 — Select interface language
+
+**Role:** Guest, User, or Admin
+
+**Design surfaces:** Public access screens, application navigation, Admin Console
+
+### Main path
+
+1. On a first visit, the app selects the first supported language from the browser preference order, or English when there is no supported preference.
+2. A Guest can open the locale selector on sign-in, sign-up, or password-recovery screens and select Russian, Greek, or English.
+3. The interface changes immediately.
+4. An authenticated User or Admin can select a locale from application navigation; the selection also applies immediately in the Admin Console and is retained for later sign-ins.
+
+### Result
+
+The visitor can use the interface in a supported language without changing the fixed Russian-to-Greek learning pair.
+
+**Requirements:** FR-39
 
 ## Scenario 1 — Sign up and first-time setup
 
@@ -205,25 +224,28 @@ The User can see current progress without mistaking unavailable or not-yet-colle
 ## Scenario 8 — Update learning content
 
 **Role:** Admin  
-**Design surfaces:** Connected Sheet, Admin Console, import status
+**Design surfaces:** Connected `Topics` and `Meanings` tables, vocabulary-generation binary, Admin Console, import status
 
 ### Main path
 
-1. The Admin maintains Topics and reviewed Meaning rows in the connected Sheet. Vocabulary generation, if needed, is run outside the app.
-2. The Admin opens the **Admin Console** and selects **Update words from connected sheet**.
-3. The console shows that the import completed successfully.
-4. New or updated active content becomes available to Users according to their settings.
+1. The Admin adds a Topic to the `Topics` table with `active=true` and `filled=false`. The Admin does not add word rows manually.
+2. The Admin runs the vocabulary-generation binary outside the application. In one run, it uses the LLM to generate words for every active, unfilled Topic at every v1 Level and writes them to the `Meanings` table.
+3. After generating all Levels for a Topic successfully, the binary marks that Topic `filled=true`. Topics already filled or inactive are skipped on later runs.
+4. The Admin opens the **Admin Console** and selects **Update catalog from Topics and Meanings tables**.
+5. The console shows that the import completed successfully.
+6. New or updated active content becomes available to Users according to their settings.
 
 ### Manage content through the Sheet
 
-- The Admin can add a Topic and import it.
-- The Admin can set a Meaning inactive; after the next successful import it is no longer shown to Users or used in new Lessons.
-- The Admin can reactivate an inactive Meaning by removing its inactive state in the Sheet and importing again.
-- The Admin can set a Topic inactive; after import, that Topic is no longer available to Users or new Lessons.
+- The Admin can add an active, unfilled Topic; it becomes available after vocabulary generation and import.
+- The Admin can set a Meaning row inactive; after the next successful import it is no longer shown to Users or used in new Lessons.
+- The Admin can reactivate an inactive Meaning by setting its `active` flag to `true` and importing again.
+- The Admin can set a Topic inactive; after import, that Topic and its words are no longer available to Users or new Lessons.
 
 ### Visible alternatives and errors
 
 - A Guest or non-Admin who attempts to open an Admin route sees a not-found page.
+- If LLM generation fails for a Topic or Level, the binary leaves the Topic unfilled, reports the failure, and the Admin can run it again.
 - If the Sheet cannot be accessed, the console shows an access error and the Admin can correct access and try again.
 - If the Sheet contains invalid data, the console reports the rows that must be corrected before the import can proceed.
 - If an import is interrupted, the console reports the interruption and the Admin can run it again.
@@ -241,6 +263,7 @@ Before a design or UI implementation is considered complete, it must include:
 - primary, loading, validation-error, empty, and recovery states named in the relevant scenario;
 - explicit first-time Settings Save and unfinished-Lesson choice states;
 - a clear distinction between `unseen`, numeric ratings, no-data scores, and `0%` vocabulary progress;
+- all application-owned visible text available in each supported interface locale, while learning-pair and LLM content remains unchanged by the interface locale;
 - user-safe error states that retain entered Lesson answers after grading failure;
 - no visible Admin navigation or route disclosure for Guests and non-Admins.
 
