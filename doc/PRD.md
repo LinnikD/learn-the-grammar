@@ -267,7 +267,7 @@ A Meaning has a single canonical Translation per language in v1.
 - **FR-21.AC-3:** Import rejects a row that would violate the one-Translation-per-language rule.
 - **FR-21.AC-4:** Required Topic, Level, and Translation fields must be present and valid before an import can begin.
 - **FR-21.AC-5:** Every importable v1 Meaning row contains exactly one English, one Russian, and one Greek Translation.
-- **FR-21.AC-6:** A new Meaning receives a stable system ID when first loaded, and that ID is written back to the connected Sheet.
+- **FR-21.AC-6:** A new Meaning receives a stable system `meaning_id` only when its row is first successfully imported from the connected Sheet into the application database. The importer writes that ID back to the `Meanings` table.
 
 ### FR-22 — Personal dictionary
 
