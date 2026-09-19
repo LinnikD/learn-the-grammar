@@ -55,7 +55,7 @@ A Lesson has three stages:
 
 - **Level:** one of `A1`, `A2`, or `B1`.
 - **Topic:** a vocabulary category. A Topic has `active` and `filled` flags. `filled` means that the vocabulary-generation binary has successfully produced its v1 vocabulary rows for the Topic.
-- **Meaning:** a language-independent concept. It belongs to exactly one Topic and one Level, and can be active or inactive. A v1 Meaning is represented as one word row in the connected Sheet.
+- **Meaning:** a language-independent concept. It belongs to exactly one Topic and one Level, and can be active or inactive. A v1 Meaning is represented as one word row in the `Meanings` table.
 - **Translation:** one language-specific expression of a Meaning. English, Russian, and Greek are stored for each Meaning in v1, with at most one Translation per language.
 - **Translation rating:** a User's progress for one specific Translation. It is either `unseen` or a numeric value in `[-1, +3]`.
 - **Grammar Concept:** a language-specific grammar item with an unlock Level.
@@ -84,7 +84,7 @@ This inventory defines which v1 screens exist and their purpose. Detailed layout
 
 | Screen | Purpose |
 | --- | --- |
-| Update words | Run `Update words from connected sheet` and show validation, access, interruption, and completion results. |
+| Update catalog | Run `Update catalog from Topics and Meanings tables` and show validation, access, interruption, and completion results. |
 
 ## 7. Global invariants
 
@@ -267,7 +267,7 @@ A Meaning has a single canonical Translation per language in v1.
 - **FR-21.AC-3:** Import rejects a row that would violate the one-Translation-per-language rule.
 - **FR-21.AC-4:** Required Topic, Level, and Translation fields must be present and valid before an import can begin.
 - **FR-21.AC-5:** Every importable v1 Meaning row contains exactly one English, one Russian, and one Greek Translation.
-- **FR-21.AC-6:** A new Meaning receives a stable system `meaning_id` only when its row is first successfully imported from the connected Sheet into the application database. The importer writes that ID back to the `Meanings` table.
+- **FR-21.AC-6:** A new Meaning receives a stable system `meaning_id` only when its row is first successfully imported from the `Meanings` table into the application database. The importer writes that ID back to the `Meanings` table.
 
 ### FR-22 — Personal dictionary
 
@@ -288,11 +288,11 @@ An Admin can remove a Meaning from active use without deleting historical data.
 - **FR-23.AC-5:** Reactivating the Meaning removes the inactive state.
 - **FR-23.AC-6:** After reactivation, existing User ratings become applicable again.
 - **FR-23.AC-7:** Deactivation or reactivation does not alter an existing unfinished Lesson snapshot.
-- **FR-23.AC-8:** The Admin controls the active/inactive state through the connected Sheet; a subsequent successful import applies it.
+- **FR-23.AC-8:** The Admin controls a Meaning's active/inactive state through the `Meanings` table; a subsequent successful import applies it.
 
 ### FR-28 — Deactivate a Topic
 
-Removing a Topic from active use is non-destructive.
+An Admin can deactivate a Topic through the `Topics` table without removing its records.
 
 - **FR-28.AC-1:** Setting a Topic's `active` flag to `false` in the `Topics` table deactivates it rather than hard-deleting it.
 - **FR-28.AC-2:** An inactive Topic and all of its Meanings are excluded from User-facing dictionaries.
@@ -546,9 +546,9 @@ The Profile reports mastery of the current main dictionary.
 
 ### FR-20 — Vocabulary generation binary
 
-The Admin enters only Topics in a connected Sheet. A separate administrative binary under `cmd/` uses the LLM to generate vocabulary rows for active, unfilled Topics.
+The Admin enters only Topics in the `Topics` table. A separate administrative binary under `cmd/` uses the LLM to generate vocabulary rows for active, unfilled Topics.
 
-- **FR-20.AC-1:** The connected Sheet has a `Topics` table and a `Meanings` table. A Topic row contains a stable `topic_id` once imported, a Topic name, `active`, and `filled`. A Meaning row contains a stable `meaning_id` once imported, its Topic reference, Level, `active`, and exactly one English, one Russian, and one Greek Translation.
+- **FR-20.AC-1:** The connected `Topics` and `Meanings` tables contain the catalog source data. A Topic row contains a stable `topic_id` once imported, a Topic name, `active`, and `filled`. A Meaning row contains a stable `meaning_id` once imported, its Topic reference, Level, `active`, and exactly one English, one Russian, and one Greek Translation.
 - **FR-20.AC-2:** The Admin creates Topic rows manually; the binary creates Meaning rows. New Topics start with `filled=false`.
 - **FR-20.AC-3:** In one run, the binary finds every Topic with `active=true` and `filled=false` and requests LLM vocabulary for each v1 Level.
 - **FR-20.AC-4:** Generated Meaning rows contain the Topic reference, Level, `active=true`, and exactly one English, one Russian, and one Greek Translation. Before a new Topic has a `topic_id`, the rows link to its Topic row; after import, they use the assigned `topic_id`. The binary writes them to the `Meanings` table; it does not import them into the application database.
@@ -585,7 +585,7 @@ An Admin can validate and apply the connected `Topics` and `Meanings` tables as 
 - **FR-38.AC-11:** If application stops partway through, already applied rows remain applied.
 - **FR-38.AC-12:** Re-running the same import resumes safely and does not duplicate rows already applied.
 - **FR-38.AC-13:** The final state after a successful rerun is the same as if the validated import had completed without interruption.
-- **FR-38.AC-14:** If the system cannot access either connected table, no import is applied and the Admin sees an access error.
+- **FR-38.AC-14:** If the system cannot access the connected `Topics` or `Meanings` table, no import is applied and the Admin sees an access error.
 - **FR-38.AC-15:** If application is interrupted after processing has begun, the Admin sees an interruption result and can safely run the import again.
 - **FR-38.AC-16:** A successful import reports completion to the Admin.
 

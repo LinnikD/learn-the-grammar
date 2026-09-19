@@ -231,7 +231,7 @@ The User can see current progress without mistaking unavailable or not-yet-colle
 1. The Admin adds a Topic to the `Topics` table with `active=true` and `filled=false`. The Admin does not add word rows manually.
 2. The Admin runs the vocabulary-generation binary outside the application. In one run, it uses the LLM to generate words for every active, unfilled Topic at every v1 Level and writes them to the `Meanings` table.
 3. After generating all Levels for a Topic successfully, the binary marks that Topic `filled=true`. Topics already filled or inactive are skipped on later runs.
-4. The Admin opens the **Admin Console** and selects **Update words from connected sheet**.
+4. The Admin opens the **Admin Console** and selects **Update catalog from Topics and Meanings tables**.
 5. The console shows that the import completed successfully.
 6. New or updated active content becomes available to Users according to their settings.
 
