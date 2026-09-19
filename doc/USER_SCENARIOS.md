@@ -17,11 +17,30 @@ This document intentionally does **not** repeat:
 
 | Role | Visible access |
 | --- | --- |
-| Guest | Can use sign-in, sign-up, and password-recovery screens. Cannot enter lessons. |
+| Guest | Can use the interface-language selector and sign-in, sign-up, and password-recovery screens. Cannot enter lessons. |
 | User | Can use Settings, Start Lesson, Lesson, Lesson Result, Dictionary, and Profile. |
 | Admin | Has all User access and can open the Admin Console. |
 
 The first Admin account is created during system setup. It cannot be created through public sign-up.
+
+## Scenario 0 — Select interface language
+
+**Role:** Guest, User, or Admin
+
+**Design surfaces:** Public access screens, application navigation, Admin Console
+
+### Main path
+
+1. On a first visit, the app selects the first supported language from the browser preference order, or English when there is no supported preference.
+2. A Guest can open the locale selector on sign-in, sign-up, or password-recovery screens and select Russian, Greek, or English.
+3. The interface changes immediately.
+4. An authenticated User or Admin can select a locale from application navigation; the selection also applies immediately in the Admin Console and is retained for later sign-ins.
+
+### Result
+
+The visitor can use the interface in a supported language without changing the fixed Russian-to-Greek learning pair.
+
+**Requirements:** FR-39
 
 ## Scenario 1 — Sign up and first-time setup
 

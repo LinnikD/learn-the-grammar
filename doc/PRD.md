@@ -72,6 +72,7 @@ This inventory defines which v1 screens exist and their purpose. Detailed layout
 | Screen | Purpose |
 | --- | --- |
 | Login and sign-up | Sign in, create an account, and request password recovery. |
+| Interface language selector | Available on public access screens and in authenticated application navigation; changes the interface locale immediately. |
 | Settings | Select the Level, enable or disable active Topics, and explicitly save changes. |
 | Start Lesson | Start a Lesson; when an unfinished Lesson exists, continue it or end it and start another. |
 | Lesson | Show source sentences, one answer field per sentence, contextual word hints, and Submit. |
@@ -603,6 +604,7 @@ The application provides a localized interface independently of the User's learn
 - **FR-39.AC-7:** All application-owned visible text is localized, including navigation, forms, validation, empty states, status messages, and errors.
 - **FR-39.AC-8:** Source sentences, target-language answers, translations, and LLM feedback remain in the languages defined by the learning pair; changing the interface locale does not change that pair or translate this content.
 - **FR-39.AC-9:** Adding a future interface locale does not require changing domain entities, ratings, Lesson generation, or grading rules.
+- **FR-39.AC-10:** The locale selector is available to a Guest on sign-in, sign-up, and password-recovery screens, and to an authenticated User or Admin in application navigation.
 
 ## 9. LLM response contract requirements
 
