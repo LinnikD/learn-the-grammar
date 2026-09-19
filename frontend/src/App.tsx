@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { apiClient } from './api/client'
 import { ApiError, displayError } from './api/errors'
+import { loadGreeting, loadSession } from './api/session'
 
 type LoadState<T> =
   | { status: 'loading' }
@@ -28,44 +28,30 @@ function App() {
   const [userId, setUserId] = useState<LoadState<string>>({ status: 'loading' })
 
   useEffect(() => {
-    const controller = new AbortController()
-    const options = { signal: controller.signal }
-    apiClient
-      .GET('/api/hello', options)
-      .then(({ data }) => {
-        if (!data || typeof data.message !== 'string') {
-          throw new ApiError(
-            'Something went wrong. Please try again.',
-            'unexpected_response',
-          )
-        }
-        if (!controller.signal.aborted)
-          setMessage({ status: 'success', data: data.message })
+    let active = true
+    let sessionLoaded = false
+
+    loadSession()
+      .then((session) => {
+        sessionLoaded = true
+        if (active) setUserId({ status: 'success', data: session.user_id })
+
+        return loadGreeting()
+      })
+      .then((message) => {
+        if (active) setMessage({ status: 'success', data: message })
       })
       .catch((cause: unknown) => {
         const error = displayError(cause)
-        if (error && !controller.signal.aborted)
-          setMessage({ status: 'error', error })
+        if (!error || !active) return
+
+        setMessage({ status: 'error', error })
+        if (!sessionLoaded) setUserId({ status: 'error', error })
       })
 
-    apiClient
-      .GET('/api/me', options)
-      .then(({ data }) => {
-        if (!data || typeof data.user_id !== 'string') {
-          throw new ApiError(
-            'Something went wrong. Please try again.',
-            'unexpected_response',
-          )
-        }
-        if (!controller.signal.aborted)
-          setUserId({ status: 'success', data: data.user_id })
-      })
-      .catch((cause: unknown) => {
-        const error = displayError(cause)
-        if (error && !controller.signal.aborted)
-          setUserId({ status: 'error', error })
-      })
-    return () => controller.abort()
+    return () => {
+      active = false
+    }
   }, [])
 
   return (

@@ -40,6 +40,21 @@ func TestGetMe_ReturnsAndPersistsSessionUserID(t *testing.T) {
 	assert.NotEqual(t, firstUserID, otherUserID)
 }
 
+func TestGetMe_AcceptsSessionAfterServerRestart(t *testing.T) {
+	firstServer := httptest.NewServer(newMux(session.NewManager([]byte("stable-secret"), time.Hour)))
+	defer firstServer.Close()
+
+	jar, err := cookiejar.New(nil)
+	require.NoError(t, err)
+	client := firstServer.Client()
+	client.Jar = jar
+	userID := requestMe(t, client, firstServer.URL)
+
+	secondServer := httptest.NewServer(newMux(session.NewManager([]byte("stable-secret"), time.Hour)))
+	defer secondServer.Close()
+	assert.Equal(t, userID, requestMe(t, client, secondServer.URL))
+}
+
 func requestMe(t *testing.T, client *http.Client, baseURL string) string {
 	t.Helper()
 

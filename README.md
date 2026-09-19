@@ -96,6 +96,7 @@ A field set in a higher-priority source overrides the same field from a lower on
 | Field  | YAML key | Env var    | Default | Description             |
 |--------|----------|------------|---------|--------------------------|
 | Port   | `port`   | `LTG_PORT` | `8080`  | TCP port the server listens on |
+| Session secret | `session_secret` | `LTG_SESSION_SECRET` | random at startup | Signs session tokens |
 
 To point the backend at a YAML config file, use the `-config` flag or the `LTG_CONFIG_FILE` environment variable (the flag takes precedence):
 
@@ -128,11 +129,11 @@ make generate-check
 
 ## Sessions
 
-There is no login yet. Instead, every request automatically gets a session: if it doesn't already carry a valid `ltg_session` cookie, the backend mints a new one for a freshly generated user ID and sets it (`HttpOnly`, `Secure`, `SameSite=Lax`, signed JWT, 30-day expiry). `GET /api/me` returns the current session's user ID.
+There is no login yet. Instead, every API request automatically gets a session: if it doesn't already carry a valid `ltg_session` cookie, the backend mints a new one for a freshly generated user ID and sets it (`Secure`, `HttpOnly`, `SameSite=Lax`, signed JWT, 30-day expiry). The frontend always initializes that session through `GET /api/me` before making other API calls, which prevents first-load cookie races.
 
 This is meant to carry over once real accounts exist — login would issue the same kind of token for a real, persisted user ID instead of an auto-generated one, rather than requiring a different mechanism.
 
-The signing secret is configured the same way as other backend settings (see [Backend Configuration](#backend-configuration)): the `session_secret` YAML key or the `LTG_SESSION_SECRET` environment variable. If left unset, the server generates a random secret on startup — fine for local development, but it means sessions don't survive a restart, so any long-lived deployment should set it explicitly.
+The signing secret is configured the same way as other backend settings (see [Backend Configuration](#backend-configuration)): the `session_secret` YAML key or the `LTG_SESSION_SECRET` environment variable. If left unset, the server generates a random secret on startup — fine for local development, but it means sessions don't survive a restart. Session cookies are always `Secure`, `HttpOnly`, and `SameSite=Lax`.
 
 ## Kubernetes Mode
 
@@ -166,6 +167,8 @@ This command:
 - loads the images into the kind cluster;
 - deploys the Kubernetes manifests;
 - waits for the backend and frontend Deployments to become ready.
+
+Before deploying, `make app-run` creates a random `backend-session` Kubernetes Secret when it does not already exist. It is retained across backend pod restarts, so valid sessions remain valid. Deleting the application namespace or cluster removes it and invalidates local sessions.
 
 The resulting request flow is:
 

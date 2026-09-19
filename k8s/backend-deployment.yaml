@@ -26,6 +26,11 @@ spec:
           env:
             - name: LTG_PORT
               value: "8080"
+            - name: LTG_SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: backend-session
+                  key: signing-key
 
           readinessProbe:
             httpGet:

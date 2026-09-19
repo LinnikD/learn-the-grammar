@@ -89,4 +89,5 @@ func TestSession_ReplacesInvalidCookie(t *testing.T) {
 	userID, err := manager.Verify(rec.Result().Cookies()[0].Value)
 	require.NoError(t, err)
 	assert.Equal(t, gotUserID, userID)
+	assert.True(t, rec.Result().Cookies()[0].Secure)
 }
