@@ -18,7 +18,6 @@ type Config struct {
 	// the caller is expected to generate an ephemeral one instead of
 	// running with no secret at all — see cmd/server for that policy.
 	SessionSecret string `yaml:"session_secret"`
-
 }
 
 func defaultConfig() Config {
