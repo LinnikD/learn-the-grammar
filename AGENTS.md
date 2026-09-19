@@ -95,7 +95,6 @@ For trivial, explicitly requested edits where no architectural or design decisio
 After the implementation plan is approved and before modifying files:
 
 Confirm that the working tree does not contain unrelated uncommitted changes.
-Create a dedicated branch from the current intended base branch.
 Use a short descriptive branch name appropriate to the task.
 
 Examples:
@@ -105,9 +104,13 @@ fix/frontend-api-error
 test/login-e2e
 
 Check `git worktree list` first to avoid creating a duplicate worktree for a branch that already has one.
-Add a worktree for the branch under `.agents/worktrees/<branch-name>`:
+Create the branch and its worktree together in a single step, from the current intended base branch, so the main checkout stays on the base branch instead of switching to the new branch:
 
-    git worktree add .agents/worktrees/<branch-name> <branch-name>
+    git worktree add -b <branch-name> .agents/worktrees/<branch-name> <base-branch>
+
+Example:
+
+    git worktree add -b feature/backend-config .agents/worktrees/feature/backend-config main
 
 Do all implementation work for the task inside that worktree directory, not in the main checkout.
 
