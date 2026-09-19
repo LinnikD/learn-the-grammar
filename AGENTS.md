@@ -109,6 +109,15 @@ After implementation:
 Run the relevant tests and checks.
 Review the resulting diff for unintended changes.
 Commit only changes related to the task.
+
+When committing changes you implemented, add yourself as a `Co-Authored-By`
+trailer using your actual agent/model identity and your provider's official
+attribution email, if available.
+
+Never invent an attribution email or impersonate another agent.
+Keep the user's Git identity as the primary author/committer and never modify
+`git config user.name` or `git config user.email`.
+
 Use a concise commit message describing the change.
 Push the branch to the remote repository.
 Open a pull request against the appropriate base branch.
