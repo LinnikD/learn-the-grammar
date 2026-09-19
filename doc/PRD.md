@@ -26,7 +26,7 @@ A lesson has three steps:
 - Levels: A1, A2, B1.
 - Platform: one site with two parts: the user app, which works on desktop and in a mobile browser, and the admin console, which only the admin can open.
 - Access: only logged-in users can take a lesson.
-- Postponed: letting the user choose N for the average score; access without login for easier onboarding; adding a language through the admin console.
+- Postponed: letting the user choose N for the average score; access without login for easier onboarding; adding a language.
 
 **Non-goals**
 
@@ -39,7 +39,7 @@ A lesson has three steps:
 | Term | Meaning |
 | --- | --- |
 | Lesson | One round: several sentences to translate, then grading. |
-| Level | A1, A2 or B1. The user picks one at setup and can change it later. |
+| Level | A1, A2 or B1. A1 by default. After the first login the user is taken to the level selection page, and can change the level later. |
 | Topic | A theme such as family or travel, defined by the admin. |
 | Meaning | The unit shared by all users: one meaning of a word, with a topic, a level and its translations. The same English word can have several meanings. |
 | Translation | One word in one language for a meaning. English, Russian and Greek are stored for every meaning. |
@@ -48,7 +48,7 @@ A lesson has three steps:
 | Grammar concept | One grammar construction, tied to a language and a level. Each user has a personal rating per concept. |
 | Admin | A user account with admin rights that manages topics and words. |
 | User app | The part of the site where users take lessons, browse their dictionary and see their profile. Works on desktop and in a mobile browser. |
-| Admin console | The part of the site available only to the admin, where topics and words are managed. |
+| Admin console | The part of the site available only to the admin, where the admin loads words from the connected sheet. |
 | Main dictionary | The part of the user's dictionary that lessons use: words of the user's level and lower levels from enabled topics. |
 
 ## Screens
@@ -71,14 +71,11 @@ A skeleton only: which screens exist and what each is for. Layout and details ar
 
 | Screen | Purpose |
 | --- | --- |
-| Topics | Add a topic; delete a topic together with its meanings. |
-| Word generation | Generate meanings with translations for a topic and a level. |
-| Meanings | Browse meanings with their translations and topic; ban a meaning. |
-| Languages (postponed) | Add a language: the LLM produces its translations for the existing meanings. |
+| Update words | A button, "Update words from connected sheet", that loads the meanings from the sheet into the system. |
 
 ## Levels, topics and grammar
 
-The only required setting is the language level.
+The only required setting is the language level, A1 by default.
 
 - **Levels:** A1, A2, B1. Each level adds words and grammar on top of the lower ones. The user can change the level later: the main dictionary and the unlocked grammar change with it, while word ratings and the average score of the last lessons are kept.
 - **Topics:** all topics are enabled by default, and the user can turn off the ones they are not interested in. Disabled topics are not used in lessons. The ratings of their words are kept, so they are still there when the topic is enabled again, and disabling a topic does not change the average score of the last lessons.
@@ -100,11 +97,11 @@ The only required setting is the language level.
 ## Lesson flow
 
 - **Number of sentences:** 5 at the start; a configurable value, not chosen by the user in the first version.
-- **What the LLM receives:** the user's level, the words selected by rating, and the grammar unlocked for the level. The number of words depends on the level: as a starting point 4 words per sentence at A1, 7 at A2 and 10 at B1, which for 5 sentences is 20, 35 and 50 words. If the main dictionary has fewer words than that, all of them are sent, and the prompt says that words outside the list may be used. If there are no words at all, the lesson does not start and the user is offered to set up topics.
+- **What the LLM receives:** the user's level, the words selected by rating, and the grammar unlocked for the level. The number of words depends on the level: as a starting point 4 words per sentence at A1, 7 at A2 and 10 at B1, which for 5 sentences is 20, 35 and 50 words. If the main dictionary has fewer words than that, all of them are sent, and the prompt says that words outside the list may be used. If there are no words at all, the lesson does not start: the user sees an error and is offered to set up topics.
 - **What the LLM does:** tries to write the sentences using these words. It may use other words and may skip some of the given ones, but then it lists the skipped words. It also returns a suggested translation of each sentence, hidden and used only for hints.
 - **User:** enters translations of all sentences and submits them for checking.
-- **Unfinished lesson:** an unfinished lesson is saved. On the start lesson screen the user can continue it, or end it without a result and start a new one. A lesson ended without a result changes no ratings and no scores.
-- **LLM errors:** if the LLM does not respond or returns an unusable answer, the user sees an error message in the interface ("Oops, something went wrong").
+- **Unfinished lesson:** an unfinished lesson is saved with its sentences and the translations typed so far; how saving works is decided at implementation. On the start lesson screen the user can continue it, or end it without a result and start a new one. A lesson ended without a result changes no ratings and no scores. Changing the level or turning a topic off does not change an unfinished lesson.
+- **LLM errors:** if the LLM does not respond or returns an unusable answer, the user sees an error message in the interface ("Oops, something went wrong"). The form is not reset, so typed translations stay and the user can submit again. While waiting for the LLM, a loader blocks the screen. If the sentences could not be prepared, the user can press the start button again.
 - **Hints:** shown only when the user asks. A hint gives the translation of one word chosen by the user, not of the whole sentence. Using a hint does not affect the score.
 - **Request format:** the exact format of requests and responses is not defined here (see Out of scope of this document).
 
@@ -139,12 +136,13 @@ mastered\_pct = \frac{star\_count}{total\_dictionary\_words \times 3} \times 100
 
 ## Content administration
 
-All content is managed in the admin console; users cannot add words. Admin rights belong to specific accounts, and the first admin is created when the system is set up, not through the app.
+All content is prepared in a Google Sheet and loaded through the admin console; users cannot add words. Admin rights belong to specific accounts, and the first admin is created when the system is set up, not through the app.
 
-- **Topics:** the admin adds topics, which must exist before word generation runs, and can add new ones at any time.
-- **Word generation:** for each topic and level, the LLM generates a set of meanings with translations in English, Russian and Greek. Generated words are not reviewed before use.
-- **Ban:** the admin can ban a meaning. A banned meaning is removed from every user's dictionary and is never used in lessons or statistics.
-- **Delete a topic:** deletes all its meanings and removes them from every user's dictionary.
+- **Topics:** the admin lists topics on the topics sheet of a Google Sheet that the system can read. Topics must be listed before words are generated.
+- **Word generation:** a separate script, run by the admin outside the app, fills another sheet with LLM-generated meanings and translations in English, Russian and Greek for each topic and level. The system does not review the words; the admin reviews them in the sheet. Running the script again skips duplicates, so it must be idempotent.
+- **Import:** in the admin console the admin presses "Update words from connected sheet", and all meanings from the sheet are loaded into the system. A meaning gets an id when it is first loaded, and the system writes that id back into the sheet. Later loads match meanings by this id: a meaning with an id is updated and keeps the users' ratings, and a row without an id is added as a new meaning. If the system has no access to the sheet, the admin sees an error; if loading is interrupted, the admin sees a message. Loading can be started again safely, because repeating it gives the same result.
+- **Ban:** the admin bans a meaning in the sheet, not in the admin console. After the next load the meaning is removed from every user's dictionary and is never used in lessons or statistics. How the ban is marked in the sheet is TBD.
+- **Delete a topic:** done through the sheet, how is TBD. Deleting a topic deletes all its meanings and removes them from every user's dictionary.
 - **New language (postponed):** the LLM produces the new translation for the existing meanings. Existing ratings are not affected.
 
 ## Requirements
@@ -158,11 +156,13 @@ Rules: Levels, topics and grammar.
 | ID | Requirement |
 | --- | --- |
 | FR-26 | Only logged-in users can take a lesson. |
-| FR-1 | The user selects a level during setup; all topics are enabled by default. |
+| FR-1 | The default level is A1. After the first login the user is taken to the level selection page; all topics are enabled by default. |
 | FR-2 | The user can disable and re-enable topics. |
 | FR-18 | The first version supports the pair Russian to Greek. |
-| FR-29 | A new user can sign up with an email and a password; email confirmation is not required. |
+| FR-29 | A new user can sign up with an email and a password; email confirmation is not required, and the user is signed in automatically right after sign up. Sign up shows an error if the email is already registered or invalid, or if the password is not longer than 8 characters. |
 | FR-31 | The user can change the level later; word ratings and the average score of the last lessons are kept. |
+| FR-36 | Signing in with a wrong password fails with an error message; the user is not signed in. |
+| FR-37 | A user who forgot the password can recover access to the account. A link is sent to the user's email; after following it, the user enters a new password. |
 
 ### Epic B: Dictionary
 
@@ -195,8 +195,8 @@ Rules: Lesson flow.
 | FR-8 | For each lesson the LLM gets the user's level, the words selected by rating and the allowed grammar. |
 | FR-9 | The LLM returns sentences in the native language, each with a hidden suggested translation, and lists the words it skipped. |
 | FR-27 | The number of sentences per lesson (default 5) and N for the average score (default 5) are configurable values. |
-| FR-30 | If the main dictionary has no words, the lesson does not start and the user is offered to set up topics. |
-| FR-33 | If the LLM does not respond or returns an unusable answer, the user sees an error message in the interface. |
+| FR-30 | A lesson starts only if the main dictionary has at least one word (an enabled topic with at least one word); otherwise the lesson does not start, and the user sees an error and is offered to set up topics. |
+| FR-33 | If the LLM does not respond or returns an unusable answer, the user sees an error message in the interface; typed translations are kept so the user can submit again. |
 
 ### Epic E: Taking a lesson
 
@@ -206,7 +206,7 @@ Rules: Lesson flow.
 | --- | --- |
 | FR-11 | The user can enter translations of all sentences and submit them. |
 | FR-10 | The user can request a hint for a word of their choice; hints do not affect the score. |
-| FR-32 | An unfinished lesson is saved; the user can continue it, or end it without a result and start a new one. |
+| FR-32 | An unfinished lesson is saved with the translations typed so far; the user can continue it, or end it without a result and start a new one. |
 
 ### Epic F: Grading and feedback
 
@@ -236,11 +236,12 @@ Rules: Content administration.
 
 | ID | Requirement |
 | --- | --- |
-| FR-20 | The admin defines topics and has the LLM generate words with translations for each topic and level. |
-| FR-21 | Each generated meaning is saved with its topic, level and translations in English, Russian and Greek. |
-| FR-23 | The admin can ban a meaning; it is removed from every user's dictionary. |
-| FR-28 | The admin can add topics at any time and delete a whole topic together with its meanings. |
-| FR-34 | The admin console is available only to accounts with admin rights; the first admin is created when the system is set up. |
+| FR-20 | The admin lists topics in the connected sheet and runs a script that fills the sheet with LLM-generated words and translations for each topic and level; running it again skips duplicates. |
+| FR-21 | Each meaning in the sheet has a topic, a level, translations in English, Russian and Greek, and an id assigned when it is first loaded. |
+| FR-23 | A meaning is banned in the sheet; after the next load it is removed from every user's dictionary. |
+| FR-28 | Topics can be added at any time by listing them in the sheet; a whole topic can be deleted together with its meanings (how: TBD). |
+| FR-34 | The admin console is available only to accounts with admin rights; everyone else gets a 404 page; the first admin is created when the system is set up. |
+| FR-38 | The admin can press a button in the admin console to load all meanings from the connected sheet into the system; new meanings get an id that is written back to the sheet, and meanings that already have an id are updated and keep the users' ratings. The load can be repeated safely; access problems and interruptions are shown to the admin. |
 
 ## Risks
 
@@ -256,6 +257,7 @@ Rules: Content administration.
 
 - [ ] What grammar does each level unlock?
 - [ ] How does the app choose the words for a lesson: how many new, mistaken and mastered words, and in what order? (algorithm TBD)
+- [ ] How are a single meaning and a whole topic banned or deleted through the sheet (for example a banned column, or removing the row), and what happens to the users' ratings for them?
 
 ## Out of scope of this document
 
@@ -265,4 +267,4 @@ This document describes what the product does, not how it is built.
 - **API contract:** `api/openapi.yaml`.
 - **LLM exchange format** (requests, responses and prompts for lesson generation, grading and hints): TODO, to be designed in a separate file (path TBD). Do not implement this part without an explicit protocol.
 - **Storage:** technology and data layout are not part of this document; the entities in the glossary are logical only.
-- **User scenarios:** TODO, described in a separate document (path TBD).
+- **User scenarios:** described in the separate document User scenarios (suggested path `docs/USER_SCENARIOS.md`), which also defines the roles Guest, User and Admin. Scenarios marked TBD there must not be implemented without an explicit discussion.
