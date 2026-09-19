@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sign in</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Caveat:wght@700&display=swap">
+<style>
+:root{
+  --bg:#F6F5F1; --surface:#FFFFFF; --border:#E3E1DA;
+  --text:#201F1C; --text-secondary:#6B6862;
+  --accent:#2C5F8A; --accent-dark:#1F4763; --accent-soft:#E8F0F6;
+  --gold:#C99A3B;
+  --danger:#CF222E;
+  --radius:12px;
+  --font-display:'Sora', system-ui, sans-serif;
+  --font-body:'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-hand:'Caveat', cursive;
+}
+body{margin:0;font-family:var(--font-body);color:var(--text);}
+h1,h2,h3{font-family:var(--font-display);margin:0;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{color:var(--accent-dark);}
+
+.logo-mark{display:flex;flex-direction:column;align-items:center;}
+.logo-text{font-family:var(--font-hand);font-weight:700;font-size:36px;color:var(--accent-dark);line-height:1;}
+.logo-swash{display:block;margin-top:-4px;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;}
+.label{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-secondary);}
+
+.tab-switch{display:flex;background:var(--bg);border-radius:10px;padding:4px;gap:4px;}
+.tab-btn{flex:1;padding:10px;border-radius:8px;border:none;background:none;font-family:var(--font-body);font-size:14px;font-weight:700;color:var(--text-secondary);cursor:pointer;}
+.tab-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(32,31,28,.1);}
+
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{font-size:13px;font-weight:600;color:var(--text);}
+.field input{box-sizing:border-box;border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-family:var(--font-body);font-size:15px;color:var(--text);}
+.field input:focus{outline:none;border-color:var(--accent);}
+.field input::placeholder{color:#A6A29A;}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-body);font-weight:700;font-size:15px;border-radius:10px;padding:14px 20px;cursor:pointer;border:none;width:100%;box-sizing:border-box;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:var(--accent-dark);}
+
+.switch-link{text-align:center;font-size:13px;color:var(--text-secondary);}
+.switch-link[hidden]{display:none;}
+</style>
+</head>
+<body>
+<div style="width:1440px;min-height:900px;box-sizing:border-box;background:linear-gradient(180deg,#EAF1F6 0%,var(--bg) 45%);display:flex;align-items:center;justify-content:center;font-family:var(--font-body);">
+  <div style="width:420px;display:flex;flex-direction:column;align-items:center;gap:28px;">
+
+    <div class="logo-mark">
+      <span class="logo-text">Learn the Grammar</span>
+      <svg class="logo-swash" width="190" height="10" viewBox="0 0 300 18"><path d="M4 8c40-10 220-10 292 4" stroke="var(--gold)" stroke-width="4" stroke-linecap="round" fill="none"/></svg>
+    </div>
+
+    <div class="card" style="width:100%;padding:32px;display:flex;flex-direction:column;gap:22px;box-sizing:border-box;">
+
+      <div class="tab-switch">
+        <button type="button" id="tab-signin" class="tab-btn active">Sign in</button>
+        <button type="button" id="tab-signup" class="tab-btn">Sign up</button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
+        </div>
+      </div>
+
+      <a id="submit-btn" class="btn btn-primary" href="StartLesson.html">Sign in</a>
+
+      <div id="link-to-signup" class="switch-link">
+        Don&rsquo;t have an account? <a href="#" id="go-signup" style="font-weight:600;">Sign up</a>
+      </div>
+      <div id="link-to-signin" class="switch-link" hidden>
+        Already have an account? <a href="#" id="go-signin" style="font-weight:600;">Sign in</a>
+      </div>
+    </div>
+
+    <div style="font-size:12px;color:var(--text-secondary);">No email confirmation needed &mdash; you&rsquo;re in right away.</div>
+  </div>
+</div>
+
+<script>
+  // Reference logic: only tab state (Sign in / Sign up). Real app wires the
+  // submit button to an actual auth request instead of the static link below.
+  var tabSignIn = document.getElementById('tab-signin');
+  var tabSignUp = document.getElementById('tab-signup');
+  var submitBtn = document.getElementById('submit-btn');
+  var linkToSignup = document.getElementById('link-to-signup');
+  var linkToSignin = document.getElementById('link-to-signin');
+
+  function setMode(mode) {
+    var isSignIn = mode === 'signin';
+    tabSignIn.classList.toggle('active', isSignIn);
+    tabSignUp.classList.toggle('active', !isSignIn);
+    submitBtn.textContent = isSignIn ? 'Sign in' : 'Create account';
+    linkToSignup.hidden = !isSignIn;
+    linkToSignin.hidden = isSignIn;
+  }
+
+  tabSignIn.addEventListener('click', function () { setMode('signin'); });
+  tabSignUp.addEventListener('click', function () { setMode('signup'); });
+  document.getElementById('go-signup').addEventListener('click', function (e) { e.preventDefault(); setMode('signup'); });
+  document.getElementById('go-signin').addEventListener('click', function (e) { e.preventDefault(); setMode('signin'); });
+</script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dictionary</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Caveat:wght@700&display=swap">
+<style>
+:root{
+  --bg:#F6F5F1; --surface:#FFFFFF; --border:#E3E1DA;
+  --text:#201F1C; --text-secondary:#6B6862;
+  --accent:#2C5F8A; --accent-dark:#1F4763; --accent-soft:#E8F0F6;
+  --gold:#C99A3B;
+  --danger:#CF222E; --danger-soft:#FFEBE9;
+  --radius:12px;
+  --font-display:'Sora', system-ui, sans-serif;
+  --font-body:'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-hand:'Caveat', cursive;
+}
+body{margin:0;font-family:var(--font-body);background:var(--bg);color:var(--text);}
+h1,h2,h3{font-family:var(--font-display);margin:0;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{color:var(--accent-dark);}
+.nav{height:72px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 40px;justify-content:space-between;box-sizing:border-box;}
+.nav-left{display:flex;align-items:center;gap:40px;}
+.logo-mark{display:flex;flex-direction:column;}
+.logo-text{font-family:var(--font-hand);font-weight:700;font-size:28px;color:var(--accent-dark);line-height:1;}
+.logo-swash{display:block;margin-top:-3px;}
+.nav-links{display:flex;gap:28px;}
+.nav-link{font-size:14px;font-weight:600;color:var(--text-secondary);padding:8px 0;border-bottom:2px solid transparent;}
+.nav-link.active{color:var(--text);border-bottom-color:var(--accent);}
+.nav-right{display:flex;align-items:center;gap:14px;}
+.icon-btn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--surface);color:var(--text-secondary);flex-shrink:0;}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);}
+.label{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-secondary);}
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--text-secondary);}
+.back-link:hover{color:var(--text);}
+
+.tabs{display:flex;border-bottom:1px solid var(--border);}
+.tab{padding:12px 4px;margin-right:28px;font-size:14px;font-weight:600;color:var(--text-secondary);border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;cursor:pointer;font-family:var(--font-body);}
+.tab.active{color:var(--text);border-bottom-color:var(--accent);}
+
+.toolbar{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;}
+.count-label{font-size:14px;color:var(--text-secondary);flex-shrink:0;padding-top:11px;}
+
+.topic-filter{position:relative;width:260px;flex-shrink:0;}
+.topic-filter[hidden]{display:none;}
+.search{width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:10px;padding:11px 14px 11px 38px;font-family:var(--font-body);font-size:14px;color:var(--text);background:var(--surface);}
+.search::placeholder{color:#A6A29A;}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;}
+.topic-dropdown{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 28px rgba(32,31,28,.14);z-index:5;overflow:hidden;}
+.topic-dropdown[hidden]{display:none;}
+.topic-option{width:100%;text-align:left;padding:10px 14px;font-size:14px;font-family:var(--font-body);background:none;border:none;cursor:pointer;color:var(--text);}
+.topic-option:hover{background:var(--accent-soft);}
+.topic-chip{display:flex;align-items:center;gap:8px;background:var(--accent-soft);color:var(--accent-dark);border-radius:10px;padding:10px 10px 10px 14px;font-size:14px;font-weight:600;width:260px;box-sizing:border-box;flex-shrink:0;}
+.topic-chip[hidden]{display:none;}
+.topic-chip button{margin-left:auto;background:none;border:none;color:var(--accent-dark);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;}
+
+.sort-group{display:flex;gap:6px;flex-shrink:0;}
+.sort-btn{font-size:13px;font-weight:600;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-secondary);cursor:pointer;font-family:var(--font-body);}
+.sort-btn.active{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-dark);}
+
+.word-list{display:flex;flex-direction:column;}
+.word-row{padding:16px 26px;display:flex;align-items:center;gap:20px;}
+.word-row + .word-row{border-top:1px solid var(--border);}
+.word-main{width:240px;flex-shrink:0;}
+.word-el{font-size:17px;font-weight:700;}
+.word-ru{font-size:13px;color:var(--text-secondary);margin-top:2px;}
+.topic-tag{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent-dark);width:76px;text-align:center;flex-shrink:0;}
+.rating{margin-left:auto;display:flex;align-items:center;gap:4px;}
+.badge{font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;}
+.badge-new{background:#EFEDE7;color:var(--text-secondary);}
+.badge-low{background:var(--danger-soft);color:var(--danger);}
+.star-filled{fill:var(--gold);}
+.star-empty{fill:none;stroke:var(--border);stroke-width:1.5;}
+.empty-state{padding:40px 26px;text-align:center;color:var(--text-secondary);font-size:14px;}
+</style>
+</head>
+<body>
+<div style="width:1440px;min-height:1200px;box-sizing:border-box;background:var(--bg);display:flex;flex-direction:column;font-family:var(--font-body);">
+
+  <nav class="nav">
+    <div class="nav-left">
+      <div class="logo-mark">
+        <span class="logo-text">Learn the Grammar</span>
+        <svg class="logo-swash" width="150" height="8" viewBox="0 0 300 18"><path d="M4 8c40-10 220-10 292 4" stroke="var(--gold)" stroke-width="4" stroke-linecap="round" fill="none"/></svg>
+      </div>
+      <div class="nav-links">
+        <a class="nav-link" href="StartLesson.html">Lesson</a>
+        <a class="nav-link active" href="Dictionary.html">Dictionary</a>
+        <a class="nav-link" href="Profile.html">Profile</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <a class="icon-btn" href="Settings.html" aria-label="Settings" title="Settings">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      </a>
+      <div class="avatar">DN</div>
+    </div>
+  </nav>
+
+  <main style="flex-grow:1;display:flex;justify-content:center;padding:56px 40px 80px;">
+    <div style="width:100%;max-width:900px;display:flex;flex-direction:column;gap:24px;">
+
+      <div>
+        <a class="back-link" href="StartLesson.html">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          Back to lessons
+        </a>
+        <h1 style="font-size:32px;font-weight:700;margin-top:12px;">Dictionary</h1>
+      </div>
+
+      <div class="tabs">
+        <button type="button" class="tab active">Main dictionary</button>
+        <button type="button" class="tab">Disabled topics</button>
+        <button type="button" class="tab">Higher levels</button>
+      </div>
+
+      <div class="toolbar">
+        <span id="results-label" class="count-label"></span>
+
+        <div style="margin-left:auto;display:flex;gap:16px;flex-wrap:wrap;">
+          <div id="topic-chip" class="topic-chip" hidden>
+            <span id="topic-chip-name"></span>
+            <button type="button" id="clear-topic" aria-label="Clear topic filter">&times;</button>
+          </div>
+          <div id="topic-filter" class="topic-filter">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A6A29A" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="topic-input" class="search" placeholder="Filter by topic&hellip;" autocomplete="off">
+            <div id="topic-dropdown" class="topic-dropdown" hidden></div>
+          </div>
+
+          <div class="sort-group">
+            <button type="button" id="sort-rating" class="sort-btn active">Stars</button>
+            <button type="button" id="sort-el" class="sort-btn">A&ndash;Z Greek</button>
+            <button type="button" id="sort-ru" class="sort-btn">A&ndash;Z Russian</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="word-list" class="card word-list"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Reference logic reimplemented in vanilla JS (no framework) so this file
+  // runs standalone. Swap `allWords` / `allTopics` for real data in the app.
+  var totalWords = 142;
+  var allTopics = ['Family','Travel','Food','Work','Nature','Health','Shopping','Sport','Music','Cinema','Weather','Business','Technology','Art','History','Science','Holidays','Politics','Emotions','Clothing'];
+  var allWords = [
+    { el: 'αδελφή', ru: 'сестра', topic: 'Family', rating: 3, seen: true },
+    { el: 'σκύλος', ru: 'собака', topic: 'Family', rating: 2, seen: true },
+    { el: 'παιδί', ru: 'ребёнок', topic: 'Family', rating: null, seen: false },
+    { el: 'πάρκο', ru: 'парк', topic: 'Travel', rating: 2, seen: true },
+    { el: 'πόλη', ru: 'город', topic: 'Travel', rating: 3, seen: true },
+    { el: 'ταξίδι', ru: 'путешествие', topic: 'Travel', rating: null, seen: false },
+    { el: 'δουλειά', ru: 'работа', topic: 'Work', rating: 1, seen: true },
+    { el: 'Κυριακή', ru: 'воскресенье', topic: 'Work', rating: -1, seen: true },
+    { el: 'δείπνο', ru: 'ужин', topic: 'Food', rating: 3, seen: true },
+    { el: 'φαγητό', ru: 'еда', topic: 'Food', rating: 0, seen: true },
+    { el: 'αυλή', ru: 'двор', topic: 'Nature', rating: 1, seen: true },
+    { el: 'καιρός', ru: 'погода', topic: 'Nature', rating: 2, seen: true }
+  ];
+
+  var state = { activeTopic: null, topicQuery: '', sortBy: 'rating_desc' };
+
+  var STAR_PATH = 'M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7-6.2-3.7L6 21l1.6-7L2.2 9.2l7.1-.6L12 2z';
+
+  function displayFor(w) {
+    if (!w.seen) return { showBadge: true, badgeText: 'Not seen yet', badgeClass: 'badge-new' };
+    if (w.rating === -1) return { showBadge: true, badgeText: 'Needs practice', badgeClass: 'badge-low' };
+    return {
+      showBadge: false,
+      stars: [w.rating >= 1, w.rating >= 2, w.rating >= 3]
+    };
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function render() {
+    var list = allWords.slice();
+    if (state.activeTopic) list = list.filter(function (w) { return w.topic === state.activeTopic; });
+
+    if (state.sortBy === 'el_asc') {
+      list.sort(function (a, b) { return a.el.localeCompare(b.el, 'el'); });
+    } else if (state.sortBy === 'ru_asc') {
+      list.sort(function (a, b) { return a.ru.localeCompare(b.ru, 'ru'); });
+    } else {
+      list.sort(function (a, b) { return (b.rating === null ? -2 : b.rating) - (a.rating === null ? -2 : a.rating); });
+    }
+
+    document.getElementById('results-label').textContent = state.activeTopic
+      ? 'Showing ' + list.length + ' of ' + totalWords + ' words · ' + state.activeTopic
+      : totalWords + ' words in your dictionary';
+
+    var listEl = document.getElementById('word-list');
+    if (list.length === 0) {
+      listEl.innerHTML = '<div class="empty-state">No words in this topic yet.</div>';
+      return;
+    }
+
+    listEl.innerHTML = list.map(function (w) {
+      var d = displayFor(w);
+      var ratingHtml;
+      if (d.showBadge) {
+        ratingHtml = '<div class="rating"><span class="badge ' + d.badgeClass + '">' + d.badgeText + '</span></div>';
+      } else {
+        ratingHtml = '<div class="rating">' + d.stars.map(function (filled) {
+          return '<svg width="18" height="18" viewBox="0 0 24 24"><path class="' + (filled ? 'star-filled' : 'star-empty') + '" d="' + STAR_PATH + '"/></svg>';
+        }).join('') + '</div>';
+      }
+      return '<div class="word-row">' +
+        '<div class="word-main"><div class="word-el">' + escapeHtml(w.el) + '</div><div class="word-ru">' + escapeHtml(w.ru) + '</div></div>' +
+        '<span class="topic-tag">' + escapeHtml(w.topic) + '</span>' +
+        ratingHtml +
+        '</div>';
+    }).join('');
+  }
+
+  function renderTopicUi() {
+    var chip = document.getElementById('topic-chip');
+    var filter = document.getElementById('topic-filter');
+    if (state.activeTopic) {
+      chip.hidden = false;
+      filter.hidden = true;
+      document.getElementById('topic-chip-name').textContent = state.activeTopic;
+    } else {
+      chip.hidden = true;
+      filter.hidden = false;
+    }
+    renderDropdown();
+  }
+
+  function renderDropdown() {
+    var dropdown = document.getElementById('topic-dropdown');
+    if (state.activeTopic || !state.topicQuery) {
+      dropdown.hidden = true;
+      dropdown.innerHTML = '';
+      return;
+    }
+    var q = state.topicQuery.toLowerCase();
+    var matches = allTopics.filter(function (t) { return t.toLowerCase().indexOf(q) !== -1; }).slice(0, 6);
+    if (matches.length === 0) {
+      dropdown.hidden = true;
+      dropdown.innerHTML = '';
+      return;
+    }
+    dropdown.hidden = false;
+    dropdown.innerHTML = matches.map(function (name) {
+      return '<button type="button" class="topic-option" data-topic="' + escapeHtml(name) + '">' + escapeHtml(name) + '</button>';
+    }).join('');
+    dropdown.querySelectorAll('.topic-option').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.activeTopic = btn.getAttribute('data-topic');
+        state.topicQuery = '';
+        document.getElementById('topic-input').value = '';
+        renderTopicUi();
+        render();
+      });
+    });
+  }
+
+  document.getElementById('topic-input').addEventListener('input', function (e) {
+    state.topicQuery = e.target.value;
+    renderDropdown();
+  });
+
+  document.getElementById('clear-topic').addEventListener('click', function () {
+    state.activeTopic = null;
+    state.topicQuery = '';
+    renderTopicUi();
+    render();
+  });
+
+  function setSort(sortBy, btnId) {
+    state.sortBy = sortBy;
+    ['sort-rating', 'sort-el', 'sort-ru'].forEach(function (id) {
+      document.getElementById(id).classList.toggle('active', id === btnId);
+    });
+    render();
+  }
+  document.getElementById('sort-rating').addEventListener('click', function () { setSort('rating_desc', 'sort-rating'); });
+  document.getElementById('sort-el').addEventListener('click', function () { setSort('el_asc', 'sort-el'); });
+  document.getElementById('sort-ru').addEventListener('click', function () { setSort('ru_asc', 'sort-ru'); });
+
+  renderTopicUi();
+  render();
+</script>
+</body>
+</html>

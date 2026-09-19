@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lesson result</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Caveat:wght@700&display=swap">
+<style>
+:root{
+  --bg:#F6F5F1; --surface:#FFFFFF; --border:#E3E1DA;
+  --text:#201F1C; --text-secondary:#6B6862;
+  --accent:#2C5F8A; --accent-dark:#1F4763; --accent-soft:#E8F0F6;
+  --gold:#C99A3B; --success:#1A7F37; --success-soft:#DAFBE1;
+  --danger:#CF222E; --danger-soft:#FFEBE9;
+  --warning:#C1780A; --warning-soft:#FBF1DE;
+  --radius:12px;
+  --font-display:'Sora', system-ui, sans-serif;
+  --font-body:'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-hand:'Caveat', cursive;
+}
+body{margin:0;font-family:var(--font-body);background:var(--bg);color:var(--text);}
+h1,h2,h3{font-family:var(--font-display);margin:0;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{color:var(--accent-dark);}
+.nav{height:72px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 40px;justify-content:space-between;box-sizing:border-box;}
+.nav-left{display:flex;align-items:center;gap:40px;}
+.logo-mark{display:flex;flex-direction:column;}
+.logo-text{font-family:var(--font-hand);font-weight:700;font-size:28px;color:var(--accent-dark);line-height:1;}
+.logo-swash{display:block;margin-top:-3px;}
+.nav-links{display:flex;gap:28px;}
+.nav-link{font-size:14px;font-weight:600;color:var(--text-secondary);padding:8px 0;border-bottom:2px solid transparent;}
+.nav-link.active{color:var(--text);border-bottom-color:var(--accent);}
+.nav-right{display:flex;align-items:center;gap:14px;}
+.pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent-dark);}
+.icon-btn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--surface);color:var(--text-secondary);flex-shrink:0;}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-body);font-weight:700;font-size:15px;border-radius:10px;padding:14px 28px;cursor:pointer;border:none;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:var(--accent-dark);}
+.btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border);}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent-dark);}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);}
+.label{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-secondary);}
+.crit-row{display:flex;align-items:center;gap:16px;}
+.crit-name{width:120px;font-size:14px;font-weight:600;color:var(--text-secondary);flex-shrink:0;}
+.crit-track{flex-grow:1;height:8px;border-radius:999px;background:var(--accent-soft);overflow:hidden;}
+.crit-fill{height:100%;background:var(--accent);border-radius:999px;}
+.crit-score{width:34px;text-align:right;font-size:14px;font-weight:700;flex-shrink:0;}
+.tag{font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;}
+.tag-correct{background:var(--success-soft);color:var(--success);}
+.tag-mistake{background:var(--danger-soft);color:var(--danger);}
+.tag-unused{background:#EFEDE7;color:var(--text-secondary);}
+.lang-pair{display:flex;align-items:center;gap:6px;color:var(--text-secondary);}
+.flag-icon{display:flex;border-radius:3px;overflow:hidden;border:1px solid var(--border);line-height:0;flex-shrink:0;}
+.lang-arrow{flex-shrink:0;}
+.sentences-card{display:flex;flex-direction:column;}
+.sent-block{padding:22px 26px;display:flex;flex-direction:column;gap:14px;}
+.sent-block + .sent-block{border-top:1px solid var(--border);}
+.sent-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+.sent-source{font-size:13px;color:var(--text-secondary);}
+.status-badge{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.status-correct{background:var(--success);}
+.status-warning{background:var(--warning);}
+.status-mistake{background:var(--danger);}
+.answer-row{display:flex;gap:10px;align-items:flex-start;}
+.answer-label{width:96px;flex-shrink:0;font-size:12px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--text-secondary);padding-top:2px;}
+.answer-text{font-size:16px;line-height:1.5;}
+.mistake{background:var(--danger-soft);color:var(--danger);font-weight:700;border-radius:4px;padding:0 3px;text-decoration:line-through;}
+.fix{background:var(--success-soft);color:var(--success);font-weight:700;border-radius:4px;padding:0 3px;}
+.note{background:var(--warning-soft);color:var(--warning);font-weight:700;border-radius:4px;padding:0 3px;}
+</style>
+</head>
+<body>
+<div style="width:1440px;min-height:1500px;box-sizing:border-box;background:var(--bg);display:flex;flex-direction:column;font-family:var(--font-body);">
+
+  <nav class="nav">
+    <div class="nav-left">
+      <div class="logo-mark">
+        <span class="logo-text">Learn the Grammar</span>
+        <svg class="logo-swash" width="150" height="8" viewBox="0 0 300 18"><path d="M4 8c40-10 220-10 292 4" stroke="var(--gold)" stroke-width="4" stroke-linecap="round" fill="none"/></svg>
+      </div>
+      <div class="nav-links">
+        <a class="nav-link active" href="StartLesson.html">Lesson</a>
+        <a class="nav-link" href="Dictionary.html">Dictionary</a>
+        <a class="nav-link" href="Profile.html">Profile</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="lang-pair" aria-label="Russian to Greek">
+        <span class="flag-icon"><svg width="20" height="14" viewBox="0 0 20 14"><clipPath id="ruFlag"><rect width="20" height="14" rx="2"/></clipPath><g clip-path="url(#ruFlag)"><rect width="20" height="14" fill="#fff"/><rect y="4.67" width="20" height="4.67" fill="#0039A6"/><rect y="9.33" width="20" height="4.67" fill="#D52B1E"/></g></svg></span>
+        <svg class="lang-arrow" width="14" height="10" viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1 5h11M8 1l4 4-4 4"/></svg>
+        <span class="flag-icon"><svg width="20" height="14" viewBox="0 0 20 14"><clipPath id="grFlag"><rect width="20" height="14" rx="2"/></clipPath><g clip-path="url(#grFlag)"><rect width="20" height="14" fill="#0D5EAF"/><rect y="1.56" width="20" height="1.56" fill="#fff"/><rect y="4.67" width="20" height="1.56" fill="#fff"/><rect y="7.78" width="20" height="1.56" fill="#fff"/><rect y="10.89" width="20" height="1.56" fill="#fff"/><rect width="8" height="8" fill="#0D5EAF"/><rect x="3.2" width="1.6" height="8" fill="#fff"/><rect y="3.2" width="8" height="1.6" fill="#fff"/></g></svg></span>
+      </div>
+      <span class="pill">Level A2</span>
+      <a class="icon-btn" href="Settings.html" aria-label="Settings" title="Settings">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      </a>
+      <div class="avatar">DN</div>
+    </div>
+  </nav>
+
+  <main style="flex-grow:1;display:flex;justify-content:center;padding:56px 40px 80px;">
+    <div style="width:100%;max-width:900px;display:flex;flex-direction:column;gap:32px;">
+
+      <div>
+        <span class="label">Lesson result</span>
+        <h1 style="font-size:34px;font-weight:700;margin-top:8px;">Good effort &mdash; a few things to fix</h1>
+      </div>
+
+      <div class="card" style="padding:32px;display:flex;gap:48px;">
+        <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;width:160px;">
+          <div style="font-family:var(--font-display);font-size:52px;font-weight:700;color:var(--accent-dark);line-height:1;">7.33</div>
+          <div style="font-size:13px;color:var(--text-secondary);margin-top:8px;">out of 10</div>
+        </div>
+        <div style="flex-grow:1;display:flex;flex-direction:column;gap:16px;justify-content:center;">
+          <div class="crit-row">
+            <span class="crit-name">Grammar</span>
+            <div class="crit-track"><div class="crit-fill" style="width:70%;"></div></div>
+            <span class="crit-score">7</span>
+          </div>
+          <div class="crit-row">
+            <span class="crit-name">Spelling</span>
+            <div class="crit-track"><div class="crit-fill" style="width:70%;"></div></div>
+            <span class="crit-score">7</span>
+          </div>
+          <div class="crit-row">
+            <span class="crit-name">Vocabulary</span>
+            <div class="crit-track"><div class="crit-fill" style="width:80%;"></div></div>
+            <span class="crit-score">8</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <span class="label">Sentence by sentence</span>
+
+        <div class="card sentences-card">
+          <div class="sent-block">
+            <div class="sent-head">
+              <div class="sent-source">1. Моя сестра живёт в большом городе.</div>
+              <span class="status-badge status-mistake" role="img" aria-label="Mistake" title="Mistake">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+              </span>
+            </div>
+            <div class="answer-row">
+              <span class="answer-label">Your answer</span>
+              <div class="answer-text">Η αδερφή μου ζει σε μια <span class="mistake">μεγάλο</span> πόλη.</div>
+            </div>
+            <div class="answer-row">
+              <span class="answer-label">Suggested</span>
+              <div class="answer-text">Η αδελφή μου ζει σε μια <span class="fix">μεγάλη</span> πόλη.</div>
+            </div>
+          </div>
+
+          <div class="sent-block">
+            <div class="sent-head">
+              <div class="sent-source">2. Вчера мы ходили в парк с собакой.</div>
+              <span class="status-badge status-mistake" role="img" aria-label="Mistake" title="Mistake">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+              </span>
+            </div>
+            <div class="answer-row">
+              <span class="answer-label">Your answer</span>
+              <div class="answer-text"><span class="mistake">Χτες</span> πήγαμε στο πάρκο με <span class="mistake">το</span> σκύλο.</div>
+            </div>
+            <div class="answer-row">
+              <span class="answer-label">Suggested</span>
+              <div class="answer-text"><span class="fix">Χθες</span> πήγαμε στο πάρκο με <span class="fix">τον</span> σκύλο.</div>
+            </div>
+          </div>
+
+          <div class="sent-block">
+            <div class="sent-head">
+              <div class="sent-source">3. Он всегда завтракает перед работой.</div>
+              <span class="status-badge status-correct" role="img" aria-label="Correct" title="Correct">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+              </span>
+            </div>
+            <div class="answer-row">
+              <span class="answer-label">Your answer</span>
+              <div class="answer-text">Αυτός πάντα τρώει πρωινό πριν τη δουλειά.</div>
+            </div>
+            <div class="answer-row">
+              <span class="answer-label">Suggested</span>
+              <div class="answer-text">Αυτός πάντα τρώει πρωινό πριν τη δουλειά.</div>
+            </div>
+          </div>
+
+          <div class="sent-block">
+            <div class="sent-head">
+              <div class="sent-source">4. Наша бабушка готовит вкусный ужин по воскресеньям.</div>
+              <span class="status-badge status-warning" role="img" aria-label="Minor issue" title="Minor issue">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg>
+              </span>
+            </div>
+            <div class="answer-row">
+              <span class="answer-label">Your answer</span>
+              <div class="answer-text">Η γιαγιά μας μαγειρεύει νόστιμο δείπνο <span class="note">την Κυριακή</span>.</div>
+            </div>
+            <div class="answer-row">
+              <span class="answer-label">Suggested</span>
+              <div class="answer-text">Η γιαγιά μας μαγειρεύει νόστιμο δείπνο <span class="fix">τις Κυριακές</span>.</div>
+            </div>
+          </div>
+
+          <div class="sent-block">
+            <div class="sent-head">
+              <div class="sent-source">5. Дети играют во дворе после школы.</div>
+              <span class="status-badge status-warning" role="img" aria-label="Minor issue" title="Minor issue">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg>
+              </span>
+            </div>
+            <div class="answer-row">
+              <span class="answer-label">Your answer</span>
+              <div class="answer-text">Τα <span class="note">παιδια</span> παίζουν στην αυλή μετά το σχολείο.</div>
+            </div>
+            <div class="answer-row">
+              <span class="answer-label">Suggested</span>
+              <div class="answer-text">Τα <span class="fix">παιδιά</span> παίζουν στην αυλή μετά το σχολείο.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:28px 32px;display:flex;flex-direction:column;gap:14px;">
+        <span class="label">Advice</span>
+        <ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.5;">
+          <li>Watch adjective agreement with feminine nouns ending in -η, like μεγάλη &mdash; don&rsquo;t default to the neuter form.</li>
+          <li>Don&rsquo;t forget accents: παιδιά needs one on the ι, or the word&rsquo;s stress changes.</li>
+          <li>Recurring days usually take the plural: &ldquo;on Sundays&rdquo; is τις Κυριακές, not την Κυριακή.</li>
+        </ul>
+      </div>
+
+      <div class="card" style="padding:28px 32px;display:flex;flex-direction:column;gap:14px;">
+        <span class="label">Grammar concepts used this lesson</span>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <span class="tag tag-mistake">Adjective agreement &middot; mistake</span>
+          <span class="tag tag-correct">Past tense (aorist) &middot; correct</span>
+          <span class="tag tag-mistake">Definite article cases &middot; mistake</span>
+          <span class="tag tag-unused">Comparative forms &middot; not used</span>
+        </div>
+      </div>
+
+      <div>
+        <a class="btn btn-secondary" href="StartLesson.html">Back to lessons</a>
+      </div>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

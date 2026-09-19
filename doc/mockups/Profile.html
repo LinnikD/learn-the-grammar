@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Profile</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Caveat:wght@700&display=swap">
+<style>
+:root{
+  --bg:#F6F5F1; --surface:#FFFFFF; --border:#E3E1DA;
+  --text:#201F1C; --text-secondary:#6B6862;
+  --accent:#2C5F8A; --accent-dark:#1F4763; --accent-soft:#E8F0F6;
+  --gold:#C99A3B;
+  --radius:12px;
+  --font-display:'Sora', system-ui, sans-serif;
+  --font-body:'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-hand:'Caveat', cursive;
+}
+body{margin:0;font-family:var(--font-body);background:var(--bg);color:var(--text);}
+h1,h2,h3{font-family:var(--font-display);margin:0;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{color:var(--accent-dark);}
+.nav{height:72px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 40px;justify-content:space-between;box-sizing:border-box;}
+.nav-left{display:flex;align-items:center;gap:40px;}
+.logo-mark{display:flex;flex-direction:column;}
+.logo-text{font-family:var(--font-hand);font-weight:700;font-size:28px;color:var(--accent-dark);line-height:1;}
+.logo-swash{display:block;margin-top:-3px;}
+.nav-links{display:flex;gap:28px;}
+.nav-link{font-size:14px;font-weight:600;color:var(--text-secondary);padding:8px 0;border-bottom:2px solid transparent;}
+.nav-link.active{color:var(--text);border-bottom-color:var(--accent);}
+.nav-right{display:flex;align-items:center;gap:14px;}
+.icon-btn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--surface);color:var(--text-secondary);flex-shrink:0;}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);}
+.label{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-secondary);}
+
+.crit-row{display:flex;align-items:center;gap:16px;}
+.crit-name{width:150px;font-size:14px;font-weight:600;color:var(--text-secondary);flex-shrink:0;}
+.crit-track{flex-grow:1;height:8px;border-radius:999px;background:var(--accent-soft);overflow:hidden;}
+.crit-fill{height:100%;background:var(--accent);border-radius:999px;}
+.crit-score{width:34px;text-align:right;font-size:14px;font-weight:700;flex-shrink:0;}
+
+.stat-bar-track{height:8px;border-radius:999px;background:var(--accent-soft);overflow:hidden;}
+.stat-bar-fill{height:100%;background:var(--accent);border-radius:999px;}
+
+.concept-row{padding:14px 0;display:flex;align-items:center;gap:16px;}
+.concept-row + .concept-row{border-top:1px solid var(--border);}
+.concept-name{width:220px;font-size:14px;font-weight:600;flex-shrink:0;}
+.concept-track{flex-grow:1;height:7px;border-radius:999px;background:#EFEDE7;overflow:hidden;}
+.concept-fill{height:100%;background:var(--gold);border-radius:999px;}
+.concept-score{width:52px;text-align:right;font-size:13px;font-weight:700;color:var(--text-secondary);flex-shrink:0;}
+
+.settings-row{display:flex;justify-content:space-between;padding:12px 0;font-size:14px;}
+.settings-row + .settings-row{border-top:1px solid var(--border);}
+.settings-key{color:var(--text-secondary);}
+.settings-val{font-weight:600;}
+</style>
+</head>
+<body>
+<div style="width:1440px;min-height:1400px;box-sizing:border-box;background:var(--bg);display:flex;flex-direction:column;font-family:var(--font-body);">
+
+  <nav class="nav">
+    <div class="nav-left">
+      <div class="logo-mark">
+        <span class="logo-text">Learn the Grammar</span>
+        <svg class="logo-swash" width="150" height="8" viewBox="0 0 300 18"><path d="M4 8c40-10 220-10 292 4" stroke="var(--gold)" stroke-width="4" stroke-linecap="round" fill="none"/></svg>
+      </div>
+      <div class="nav-links">
+        <a class="nav-link" href="StartLesson.html">Lesson</a>
+        <a class="nav-link" href="Dictionary.html">Dictionary</a>
+        <a class="nav-link active" href="Profile.html">Profile</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <a class="icon-btn" href="Settings.html" aria-label="Settings" title="Settings">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      </a>
+      <div class="avatar">DN</div>
+    </div>
+  </nav>
+
+  <main style="flex-grow:1;display:flex;justify-content:center;padding:56px 40px 80px;">
+    <div style="width:100%;max-width:900px;display:flex;flex-direction:column;gap:28px;">
+
+      <div>
+        <h1 style="font-size:32px;font-weight:700;">Profile</h1>
+        <p style="font-size:15px;color:var(--text-secondary);margin-top:8px;">Your progress at a glance.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <span class="label">Average score &middot; last 5 lessons</span>
+        <div class="card" style="padding:32px;display:flex;gap:48px;">
+          <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;width:150px;">
+            <div style="font-family:var(--font-display);font-size:48px;font-weight:700;color:var(--accent-dark);line-height:1;">7.4</div>
+            <div style="font-size:13px;color:var(--text-secondary);margin-top:8px;">out of 10</div>
+          </div>
+          <div style="flex-grow:1;display:flex;flex-direction:column;gap:16px;justify-content:center;">
+            <div class="crit-row">
+              <span class="crit-name">Grammar</span>
+              <div class="crit-track"><div class="crit-fill" style="width:72%;"></div></div>
+              <span class="crit-score">7.2</span>
+            </div>
+            <div class="crit-row">
+              <span class="crit-name">Spelling</span>
+              <div class="crit-track"><div class="crit-fill" style="width:76%;"></div></div>
+              <span class="crit-score">7.6</span>
+            </div>
+            <div class="crit-row">
+              <span class="crit-name">Vocabulary</span>
+              <div class="crit-track"><div class="crit-fill" style="width:74%;"></div></div>
+              <span class="crit-score">7.4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:24px;">
+        <div style="flex:1;display:flex;flex-direction:column;gap:14px;">
+          <span class="label">Vocabulary progress</span>
+          <div class="card" style="padding:24px;">
+            <div style="font-family:var(--font-display);font-size:28px;font-weight:700;">42%</div>
+            <div class="stat-bar-track" style="margin-top:12px;"><div class="stat-bar-fill" style="width:42%;"></div></div>
+            <div style="font-size:13px;color:var(--text-secondary);margin-top:10px;">of stars earned in your main dictionary</div>
+          </div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:14px;">
+          <span class="label">Current settings</span>
+          <div class="card" style="padding:20px 24px;">
+            <div class="settings-row"><span class="settings-key">Language pair</span><span class="settings-val">Russian &rarr; Greek</span></div>
+            <div class="settings-row"><span class="settings-key">Level</span><span class="settings-val">A2</span></div>
+            <div class="settings-row"><span class="settings-key">Topics enabled</span><span class="settings-val">92 of 108</span></div>
+            <div style="padding-top:12px;">
+              <a href="Settings.html" style="font-size:13px;font-weight:600;">Edit in Settings &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <span class="label">Grammar concepts</span>
+        <div class="card" style="padding:8px 26px;">
+          <div class="concept-row">
+            <span class="concept-name">Present tense conjugation</span>
+            <div class="concept-track"><div class="concept-fill" style="width:90%;"></div></div>
+            <span class="concept-score">9 / 10</span>
+          </div>
+          <div class="concept-row">
+            <span class="concept-name">Plural nouns</span>
+            <div class="concept-track"><div class="concept-fill" style="width:80%;"></div></div>
+            <span class="concept-score">8 / 10</span>
+          </div>
+          <div class="concept-row">
+            <span class="concept-name">Subject&ndash;verb agreement</span>
+            <div class="concept-track"><div class="concept-fill" style="width:70%;"></div></div>
+            <span class="concept-score">7 / 10</span>
+          </div>
+          <div class="concept-row">
+            <span class="concept-name">Past tense (aorist)</span>
+            <div class="concept-track"><div class="concept-fill" style="width:60%;"></div></div>
+            <span class="concept-score">6 / 10</span>
+          </div>
+          <div class="concept-row">
+            <span class="concept-name">Question formation</span>
+            <div class="concept-track"><div class="concept-fill" style="width:50%;"></div></div>
+            <span class="concept-score">5 / 10</span>
+          </div>
+          <div class="concept-row">
+            <span class="concept-name">Adjective agreement</span>
+            <div class="concept-track"><div class="concept-fill" style="width:40%;"></div></div>
+            <span class="concept-score">4 / 10</span>
+          </div>
+          <div class="concept-row">
+            <span class="concept-name">Definite article cases</span>
+            <div class="concept-track"><div class="concept-fill" style="width:30%;"></div></div>
+            <span class="concept-score">3 / 10</span>
+          </div>
+          <div class="concept-row">
+            <span class="concept-name">Comparative forms</span>
+            <div class="concept-track"><div class="concept-fill" style="width:0%;"></div></div>
+            <span class="concept-score">0 / 10</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>
