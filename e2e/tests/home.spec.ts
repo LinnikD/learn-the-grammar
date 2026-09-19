@@ -20,7 +20,7 @@ test('home page displays an auto-created session user id', async ({ page }) => {
 
   expect(sessionCookie).toBeDefined()
   expect(sessionCookie?.httpOnly).toBe(true)
-	expect(sessionCookie?.secure).toBe(true)
+  expect(sessionCookie?.secure).toBe(true)
   expect(sessionCookie?.sameSite).toBe('Lax')
 
   await page.reload()

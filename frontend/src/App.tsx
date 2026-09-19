@@ -61,7 +61,6 @@ function App() {
       {message.status === 'error' && <ErrorMessage error={message.error} />}
       {userId.status === 'loading' && <p>Loading session...</p>}
       {userId.status === 'success' && <p>Session user: {userId.data}</p>}
-      {userId.status === 'error' && <ErrorMessage error={userId.error} />}
     </>
   )
 }

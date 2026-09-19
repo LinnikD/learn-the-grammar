@@ -1,4 +1,5 @@
 import { apiClient } from './client'
+import { ApiError } from './errors'
 
 type Session = { user_id: string }
 
@@ -12,7 +13,12 @@ export function loadSession(): Promise<Session> {
     loadingSession = apiClient
       .GET('/api/me')
       .then(({ data, error }) => {
-        if (error || !data) throw new Error('failed to load session')
+        if (error || !data || typeof data.user_id !== 'string') {
+          throw new ApiError(
+            'Something went wrong. Please try again.',
+            'unexpected_response',
+          )
+        }
         return data
       })
       .catch((error: unknown) => {
@@ -31,7 +37,12 @@ export function loadGreeting(): Promise<string> {
     loadingGreeting = apiClient
       .GET('/api/hello')
       .then(({ data, error }) => {
-        if (error || !data) throw new Error('failed to load message')
+        if (error || !data || typeof data.message !== 'string') {
+          throw new ApiError(
+            'Something went wrong. Please try again.',
+            'unexpected_response',
+          )
+        }
         return data.message
       })
       .catch((error: unknown) => {
