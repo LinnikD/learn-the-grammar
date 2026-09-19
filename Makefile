@@ -13,7 +13,7 @@ FRONTEND_IMAGE := learn-the-grammar-frontend:dev
 	cluster-up cluster-down \
 	ingress-up \
 	images-build images-load \
-	app-deploy app-delete \
+	app-deploy app-delete session-secret \
 	status \
 	frontend-dev backend-dev \
 	unit-test \
@@ -87,11 +87,16 @@ images-load:
 app-deploy:
 	@echo "Deploying application..."
 	kubectl apply -f k8s/namespace.yaml
+	@$(MAKE) session-secret
 	kubectl apply -f k8s/backend-deployment.yaml
 	kubectl apply -f k8s/backend-service.yaml
 	kubectl apply -f k8s/frontend-deployment.yaml
 	kubectl apply -f k8s/frontend-service.yaml
 	kubectl apply -f k8s/ingress.yaml
+	kubectl rollout restart deployment/backend \
+		--namespace $(NAMESPACE)
+	kubectl rollout restart deployment/frontend \
+		--namespace $(NAMESPACE)
 
 	kubectl rollout status deployment/backend \
 		--namespace $(NAMESPACE) \
@@ -99,6 +104,17 @@ app-deploy:
 	kubectl rollout status deployment/frontend \
 		--namespace $(NAMESPACE) \
 		--timeout=120s
+
+
+session-secret:
+	@if kubectl get secret backend-session --namespace $(NAMESPACE) >/dev/null 2>&1; then \
+		echo "Backend session secret already exists"; \
+	else \
+		echo "Creating backend session secret..."; \
+		kubectl create secret generic backend-session \
+			--namespace $(NAMESPACE) \
+			--from-literal=signing-key="$$(head -c 32 /dev/urandom | base64)"; \
+	fi
 
 
 app-delete:
