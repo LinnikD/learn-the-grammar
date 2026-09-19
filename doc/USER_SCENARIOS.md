@@ -34,7 +34,7 @@ The first Admin account is created during system setup. It cannot be created thr
 2. The Guest enters an email address and password and submits the form.
 3. The account is created and the new User is signed in automatically.
 4. The app opens **Settings**. `A1` is selected and all currently active Topics are enabled.
-5. The User may change the Level and enabled Topics.
+5. The User may change the interface language, Level, and enabled Topics.
 6. The User selects **Save**.
 7. The app opens **Start Lesson**.
 
@@ -48,7 +48,7 @@ The first Admin account is created during system setup. It cannot be created thr
 
 The User has completed onboarding and has saved learning settings.
 
-**Requirements:** FR-1, FR-2, FR-26, FR-29, FR-30, FR-31
+**Requirements:** FR-1, FR-2, FR-26, FR-29, FR-30, FR-31, FR-39
 
 ## Scenario 2 — Sign in and recover access
 
@@ -138,21 +138,21 @@ The User either resumes the same unfinished work or intentionally starts fresh. 
 ### Main path
 
 1. The User opens **Settings**.
-2. The User selects `A1`, `A2`, or `B1` and enables or disables active Topics.
+2. The User selects an interface language, selects `A1`, `A2`, or `B1`, and enables or disables active Topics.
 3. The User selects **Save**.
 4. The app confirms the saved settings. The Dictionary and future Lessons use the updated selection.
 
 ### Visible alternatives and errors
 
 - Leaving without Save does not apply the changes.
-- Existing ratings and completed-Lesson history remain available after changing Level or Topics.
+- Existing ratings and completed-Lesson history remain available after changing the interface language, Level, or Topics.
 - An unfinished Lesson remains unchanged and can still be resumed from Start Lesson.
 
 ### Result
 
 Future lesson content and the current main dictionary match the saved settings.
 
-**Requirements:** FR-1, FR-2, FR-4, FR-6, FR-31, FR-32
+**Requirements:** FR-1, FR-2, FR-4, FR-6, FR-31, FR-32, FR-39
 
 ## Scenario 6 — Browse the Dictionary
 
@@ -241,6 +241,7 @@ Before a design or UI implementation is considered complete, it must include:
 - primary, loading, validation-error, empty, and recovery states named in the relevant scenario;
 - explicit first-time Settings Save and unfinished-Lesson choice states;
 - a clear distinction between `unseen`, numeric ratings, no-data scores, and `0%` vocabulary progress;
+- all application-owned visible text available in each supported interface locale, while learning-pair and LLM content remains unchanged by the interface locale;
 - user-safe error states that retain entered Lesson answers after grading failure;
 - no visible Admin navigation or route disclosure for Guests and non-Admins.
 

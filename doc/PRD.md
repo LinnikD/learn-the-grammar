@@ -1,7 +1,7 @@
 # PRD: Learn the Grammar — Language Grammar & Writing Trainer
 
 **Status:** Draft, implementation-ready except for the vocabulary selection algorithm in FR-8  
-**Version:** 2.0  
+**Version:** 2.1
 **Language:** English  
 
 ## 1. Overview
@@ -26,6 +26,7 @@ This document is the product source of truth for v1. Every acceptance criterion 
 - Catalog languages: English, Russian, and Greek are stored for every Meaning.
 - Levels: `A1`, `A2`, and `B1`.
 - Platform: a responsive web User app and a separate Admin console.
+- Interface locales: Russian (`ru`), Greek (`el`), and English (`en`), with English as the fallback.
 - Access: only authenticated Users can take or continue Lessons.
 - Configuration: Lesson size, average window, and words-per-sentence targets are deployment settings rather than User settings.
 
@@ -71,7 +72,7 @@ This inventory defines which v1 screens exist and their purpose. Detailed layout
 | Screen | Purpose |
 | --- | --- |
 | Login and sign-up | Sign in, create an account, and request password recovery. |
-| Settings | Select the Level, enable or disable active Topics, and explicitly save changes. |
+| Settings | Select the interface language and Level, enable or disable active Topics, and explicitly save changes. |
 | Start Lesson | Start a Lesson; when an unfinished Lesson exists, continue it or end it and start another. |
 | Lesson | Show source sentences, one answer field per sentence, contextual word hints, and Submit. |
 | Lesson result | Show criterion scores, overall score, advice, and a correct/reference/alternative version for every sentence. |
@@ -585,6 +586,22 @@ An Admin can validate and apply Sheet data as idempotent catalog upserts.
 - **FR-38.AC-14:** If the system cannot access the connected Sheet, no import is applied and the Admin sees an access error.
 - **FR-38.AC-15:** If application is interrupted after processing has begun, the Admin sees an interruption result and can safely run the import again.
 - **FR-38.AC-16:** A successful import reports completion to the Admin.
+
+### Epic I — Interface localization
+
+### FR-39 — Interface language
+
+The application provides a localized interface independently of the User's learning language pair.
+
+- **FR-39.AC-1:** The v1 interface supports Russian (`ru`), Greek (`el`), and English (`en`).
+- **FR-39.AC-2:** On a first visit, the application uses the first supported locale in the browser's language-preference order.
+- **FR-39.AC-3:** If none of the browser's preferred locales is supported, the application uses English.
+- **FR-39.AC-4:** A Guest or authenticated User can select any supported interface locale.
+- **FR-39.AC-5:** The selected locale takes effect immediately across the User app and Admin console.
+- **FR-39.AC-6:** For an authenticated User, the selected locale is retained and used after later sign-ins.
+- **FR-39.AC-7:** All application-owned visible text is localized, including navigation, forms, validation, empty states, status messages, and errors.
+- **FR-39.AC-8:** Source sentences, target-language answers, translations, and LLM feedback remain in the languages defined by the learning pair; changing the interface locale does not change that pair or translate this content.
+- **FR-39.AC-9:** Adding a future interface locale does not require changing domain entities, ratings, Lesson generation, or grading rules.
 
 ## 9. LLM response contract requirements
 
