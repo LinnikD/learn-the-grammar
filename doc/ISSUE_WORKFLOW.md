@@ -2,6 +2,8 @@
 
 GitHub Issues are the delivery backlog and the concise record of implementation status. The PRD describes the intended final product; an Issue shows whether a bounded piece of that product is ready, underway, blocked, or complete in `main`.
 
+Use an Issue for planned backlog work. An Issue is optional for an isolated ad hoc change, such as a small documentation or repository correction that does not need backlog tracking.
+
 ## Finding work and reading status
 
 Use the repository's **Issues** tab and these filters:
@@ -51,7 +53,7 @@ Every Issue states its outcome, scope, and completion conditions.
 
 ## Pull requests and completion
 
-One Issue may have more than one pull request. Each active pull request uses `Refs #<issue-number>` in its description. The final pull request uses `Closes #<issue-number>` only when it completes the entire Issue.
+One Issue may have more than one pull request. When a pull request is linked to an Issue, each active pull request uses `Refs #<issue-number>` in its description. The final pull request uses `Closes #<issue-number>` only when it completes the entire Issue.
 
 Keep the Issue `status:in-progress` until every linked pull request is merged and every completion condition is satisfied. A merged partial pull request does not close the Issue.
 
