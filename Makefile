@@ -22,6 +22,7 @@ FRONTEND_IMAGE := learn-the-grammar-frontend:dev
 	frontend-fmt frontend-fmt-check frontend-lint \
 	generate generate-check \
 	backend-generate frontend-generate \
+	db-migrate-up db-migrate-down db-migrate-status \
 	e2e
 
 
@@ -182,12 +183,21 @@ frontend-generate:
 	cd frontend && npm run generate
 
 generate-check: generate
-	@changed=$$(git status --porcelain -- backend/internal/api/api.gen.go frontend/src/api/schema.gen.ts); \
+	@changed=$$(git status --porcelain -- backend/internal/api/api.gen.go frontend/src/api/schema.gen.ts backend/internal/db); \
 	if [ -n "$$changed" ]; then \
-		echo "Generated API code is out of date with api/openapi.yaml. Run 'make generate' and commit the result:"; \
+		echo "Generated code is out of date with its source. Run 'make generate' and commit the result:"; \
 		echo "$$changed"; \
 		exit 1; \
 	fi
+
+db-migrate-up:
+	cd backend && go run ./cmd/migrate up
+
+db-migrate-down:
+	cd backend && go run ./cmd/migrate down
+
+db-migrate-status:
+	cd backend && go run ./cmd/migrate status
 
 e2e:
 	cd e2e && npm test

@@ -93,3 +93,20 @@ func TestLoad_SessionSecretEnvOverridesFile(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "from-env", cfg.SessionSecret)
 }
+
+func TestLoad_DatabaseURLFromFile(t *testing.T) {
+	path := writeFile(t, "database_url: postgres://from-file\n")
+
+	cfg, err := Load(path)
+	require.NoError(t, err)
+	assert.Equal(t, "postgres://from-file", cfg.DatabaseURL)
+}
+
+func TestLoad_DatabaseURLEnvOverridesFile(t *testing.T) {
+	path := writeFile(t, "database_url: postgres://from-file\n")
+	t.Setenv("LTG_DATABASE_URL", "postgres://from-env")
+
+	cfg, err := Load(path)
+	require.NoError(t, err)
+	assert.Equal(t, "postgres://from-env", cfg.DatabaseURL)
+}
