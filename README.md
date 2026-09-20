@@ -1,6 +1,11 @@
 # learn-the-grammar
 SaaS project for studying language grammar
 
+## Project documentation
+
+- [Product requirements](doc/PRD.md)
+- [User scenarios](doc/USER_SCENARIOS.md)
+- [GitHub Issue workflow](doc/ISSUE_WORKFLOW.md)
 
 ## Local Development
 

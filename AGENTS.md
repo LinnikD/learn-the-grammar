@@ -1,5 +1,9 @@
 # General Workflow
 
+## GitHub Issues
+
+Use [doc/ISSUE_WORKFLOW.md](doc/ISSUE_WORKFLOW.md) for the shared process for finding, implementing, and closing GitHub Issues. Treat it as the source of truth for Issue identifiers, labels, status, and links between Issues and pull requests. An Issue is required for planned backlog work and optional for an isolated ad hoc change. For functional requirements and acceptance criteria, use `doc/PRD.md` as the sole source of truth.
+
 For every task:
 
 Inspect the relevant parts of the repository before proposing changes.
@@ -20,6 +24,8 @@ Wait for explicit approval before modifying files.
 Discussing features take a look into doc/ directory and check requirements
 On any requirements conflict discuss it explicitly before implementation
 
+For planned backlog work linked to an Issue, confirm that the Issue is `status:ready` before starting. Do not begin implementation from an Issue marked `status:blocked` or without a ready status.
+
 Do not start implementation while discussing or refining the plan.
 
 For trivial, explicitly requested edits where no architectural or design decision is involved, a plan is not required unless requested.
@@ -29,6 +35,7 @@ For trivial, explicitly requested edits where no architectural or design decisio
 After the plan is approved:
 
 Implement only the approved scope.
+For Issue-backed work, change the linked Issue to `status:in-progress`. If work becomes blocked, record the blocker and change its status to `status:blocked`.
 Follow existing project patterns and applicable AGENTS.md instructions.
 Prefer the smallest coherent change that satisfies the requirements.
 Do not introduce unrelated refactoring, dependencies, abstractions, or infrastructure changes.
@@ -140,6 +147,8 @@ a concise summary of the change;
 important implementation or architectural decisions;
 tests and checks that were run;
 any known limitations or follow-up work.
+
+For an Issue-backed pull request, use `Refs #<issue-number>` until the final pull request. Use `Closes #<issue-number>` only in the final pull request that completes all Issue conditions; keep the Issue `status:in-progress` until then.
 
 Do not merge the pull request unless explicitly instructed to do so.
 
