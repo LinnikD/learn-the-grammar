@@ -12,9 +12,9 @@ import (
 	"github.com/LinnikD/learn-the-grammar/backend/internal/db"
 )
 
-// StartPostgres starts an ephemeral PostgreSQL container, applies every
-// migration in db.MigrationsDir, and returns a connection pool to it.
-// The container and pool are torn down via t.Cleanup.
+// StartPostgres starts an ephemeral PostgreSQL container, applies
+// every embedded migration, and returns a connection pool to it. The
+// container and pool are torn down via t.Cleanup.
 func StartPostgres(t *testing.T) *pgxpool.Pool {
 	t.Helper()
 
@@ -40,7 +40,7 @@ func StartPostgres(t *testing.T) *pgxpool.Pool {
 		t.Fatalf("reading postgres connection string: %v", err)
 	}
 
-	if err := db.MigrateUp(dsn, db.MigrationsDir); err != nil {
+	if err := db.MigrateUp(dsn); err != nil {
 		t.Fatalf("applying migrations: %v", err)
 	}
 

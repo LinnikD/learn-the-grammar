@@ -1,5 +1,5 @@
 // Command migrate applies, rolls back, or reports the status of the
-// PostgreSQL schema migrations in backend/db/migrations.
+// PostgreSQL schema migrations embedded from backend/internal/db/migrations.
 //
 // It intentionally wraps only the goose library functions this backend
 // needs instead of depending on goose's own CLI (cmd/goose), which
@@ -32,11 +32,11 @@ func run(args []string) error {
 
 	switch args[0] {
 	case "up":
-		return db.MigrateUp(dsn, db.MigrationsDir)
+		return db.MigrateUp(dsn)
 	case "down":
-		return db.MigrateDown(dsn, db.MigrationsDir)
+		return db.MigrateDown(dsn)
 	case "status":
-		return db.MigrateStatus(dsn, db.MigrationsDir)
+		return db.MigrateStatus(dsn)
 	default:
 		return fmt.Errorf("unknown command %q: usage: migrate <up|down|status>", args[0])
 	}
