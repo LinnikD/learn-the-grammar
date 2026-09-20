@@ -20,9 +20,7 @@ type Config struct {
 	SessionSecret string `yaml:"session_secret"`
 
 	// DatabaseURL is the PostgreSQL connection string (see internal/db).
-	// Nothing consumes it yet; it exists so features that need
-	// persistence can read it from configuration instead of adding
-	// their own loading logic.
+	// Required: cmd/server exits at startup if it is empty.
 	DatabaseURL string `yaml:"database_url"`
 }
 

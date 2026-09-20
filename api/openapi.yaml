@@ -45,6 +45,41 @@ paths:
               schema:
                 $ref: "#/components/schemas/MeResponse"
 
+  /api/settings:
+    get:
+      operationId: getSettings
+      summary: Returns the current learning settings.
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SettingsResponse"
+    put:
+      operationId: putSettings
+      summary: Saves the learning settings and completes onboarding.
+      description: >
+        Onboarding, once completed, stays completed: a later save never
+        un-completes it.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaveSettingsRequest"
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SettingsResponse"
+
 components:
   responses:
     Error:
@@ -84,3 +119,37 @@ components:
         user_id:
           type: string
           format: uuid
+
+    Level:
+      type: string
+      enum: [A1, A2, B1]
+
+    Topic:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+
+    SettingsResponse:
+      type: object
+      required: [level, onboarding_completed, topics]
+      properties:
+        level:
+          $ref: "#/components/schemas/Level"
+        onboarding_completed:
+          type: boolean
+        topics:
+          type: array
+          items:
+            $ref: "#/components/schemas/Topic"
+
+    SaveSettingsRequest:
+      type: object
+      required: [level]
+      properties:
+        level:
+          $ref: "#/components/schemas/Level"

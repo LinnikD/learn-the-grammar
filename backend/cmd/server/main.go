@@ -21,8 +21,10 @@ import (
 	"github.com/LinnikD/learn-the-grammar/backend/internal/api"
 	"github.com/LinnikD/learn-the-grammar/backend/internal/apierror"
 	"github.com/LinnikD/learn-the-grammar/backend/internal/config"
+	"github.com/LinnikD/learn-the-grammar/backend/internal/db"
 	"github.com/LinnikD/learn-the-grammar/backend/internal/middleware"
 	"github.com/LinnikD/learn-the-grammar/backend/internal/session"
+	"github.com/LinnikD/learn-the-grammar/backend/internal/settings"
 )
 
 const (
@@ -32,7 +34,9 @@ const (
 
 // server implements api.StrictServerInterface, the contract generated
 // from api/openapi.yaml.
-type server struct{}
+type server struct {
+	settings *settings.Service
+}
 
 func (server) GetHello(_ context.Context, _ api.GetHelloRequestObject) (api.GetHelloResponseObject, error) {
 	return api.GetHello200JSONResponse{Message: "Learn The Grammar!"}, nil
@@ -54,13 +58,58 @@ func (server) GetMe(ctx context.Context, _ api.GetMeRequestObject) (api.GetMeRes
 	return api.GetMe200JSONResponse{UserId: parsed}, nil
 }
 
-func newMux(sessionManager *session.Manager) http.Handler {
+// GetSettings and PutSettings currently operate on the single stub user
+// (db.StubUserID) rather than the request's own session identity — see
+// DEBT-1.
+func (s server) GetSettings(ctx context.Context, _ api.GetSettingsRequestObject) (api.GetSettingsResponseObject, error) {
+	result, err := s.settings.Get(ctx, db.StubUserID)
+	if err != nil {
+		return nil, fmt.Errorf("getting settings: %w", err)
+	}
+
+	return api.GetSettings200JSONResponse(toSettingsResponse(result)), nil
+}
+
+func (s server) PutSettings(ctx context.Context, request api.PutSettingsRequestObject) (api.PutSettingsResponseObject, error) {
+	if !request.Body.Level.Valid() {
+		return api.PutSettingsdefaultJSONResponse{
+			Body: api.ErrorResponse{
+				Code:      "invalid_request",
+				Message:   "The request is invalid.",
+				RequestId: apierror.RequestID(ctx),
+			},
+			StatusCode: http.StatusBadRequest,
+		}, nil
+	}
+
+	result, err := s.settings.Save(ctx, db.StubUserID, string(request.Body.Level))
+	if err != nil {
+		return nil, fmt.Errorf("saving settings: %w", err)
+	}
+
+	return api.PutSettings200JSONResponse(toSettingsResponse(result)), nil
+}
+
+func toSettingsResponse(result settings.Settings) api.SettingsResponse {
+	topics := make([]api.Topic, len(result.Topics))
+	for i, topic := range result.Topics {
+		topics[i] = api.Topic{Id: topic.ID, Name: topic.Name}
+	}
+
+	return api.SettingsResponse{
+		Level:               api.Level(result.Level),
+		OnboardingCompleted: result.OnboardingCompleted,
+		Topics:              topics,
+	}
+}
+
+func newMux(sessionManager *session.Manager, settingsSvc *settings.Service) http.Handler {
 	mux := http.NewServeMux()
 
 	badRequest := func(w http.ResponseWriter, r *http.Request, err error) {
 		apierror.Write(w, r, http.StatusBadRequest, err)
 	}
-	strict := api.NewStrictHandlerWithOptions(server{}, nil, api.StrictHTTPServerOptions{
+	strict := api.NewStrictHandlerWithOptions(server{settings: settingsSvc}, nil, api.StrictHTTPServerOptions{
 		RequestErrorHandlerFunc: badRequest,
 		ResponseErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
 			apierror.Write(w, r, http.StatusInternalServerError, err)
@@ -166,6 +215,20 @@ func main() {
 		os.Exit(1)
 	}
 
+	if cfg.DatabaseURL == "" {
+		slog.Error("LTG_DATABASE_URL is not set")
+		os.Exit(1)
+	}
+
+	pool, err := db.Connect(context.Background(), cfg.DatabaseURL)
+	if err != nil {
+		slog.Error("failed to connect to database", "error", err)
+		os.Exit(1)
+	}
+	defer pool.Close()
+
+	settingsSvc := settings.NewService(pool)
+
 	sessionSecret, err := resolveSessionSecret(cfg.SessionSecret)
 	if err != nil {
 		slog.Error("failed to resolve session secret", "error", err)
@@ -184,7 +247,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	handler := newMux(sessionManager)
+	handler := newMux(sessionManager, settingsSvc)
 
 	slog.Info("server listening", "addr", addr)
 

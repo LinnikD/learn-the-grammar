@@ -15,6 +15,27 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for Level.
+const (
+	A1 Level = "A1"
+	A2 Level = "A2"
+	B1 Level = "B1"
+)
+
+// Valid indicates whether the value is a known member of the Level enum.
+func (e Level) Valid() bool {
+	switch e {
+	case A1:
+		return true
+	case A2:
+		return true
+	case B1:
+		return true
+	default:
+		return false
+	}
+}
+
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
 	Code      string `json:"code"`
@@ -27,13 +48,37 @@ type HelloResponse struct {
 	Message string `json:"message"`
 }
 
+// Level defines model for Level.
+type Level string
+
 // MeResponse defines model for MeResponse.
 type MeResponse struct {
 	UserId openapi_types.UUID `json:"user_id"`
 }
 
+// SaveSettingsRequest defines model for SaveSettingsRequest.
+type SaveSettingsRequest struct {
+	Level Level `json:"level"`
+}
+
+// SettingsResponse defines model for SettingsResponse.
+type SettingsResponse struct {
+	Level               Level   `json:"level"`
+	OnboardingCompleted bool    `json:"onboarding_completed"`
+	Topics              []Topic `json:"topics"`
+}
+
+// Topic defines model for Topic.
+type Topic struct {
+	Id   openapi_types.UUID `json:"id"`
+	Name string             `json:"name"`
+}
+
 // Error defines model for Error.
 type Error = ErrorResponse
+
+// PutSettingsJSONRequestBody defines body for PutSettings for application/json ContentType.
+type PutSettingsJSONRequestBody = SaveSettingsRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -43,6 +88,12 @@ type ServerInterface interface {
 	// GetMe Returns the current session's user ID.
 	// (GET /api/me)
 	GetMe(w http.ResponseWriter, r *http.Request)
+	// GetSettings Returns the current learning settings.
+	// (GET /api/settings)
+	GetSettings(w http.ResponseWriter, r *http.Request)
+	// PutSettings Saves the learning settings and completes onboarding.
+	// (PUT /api/settings)
+	PutSettings(w http.ResponseWriter, r *http.Request)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -73,6 +124,34 @@ func (siw *ServerInterfaceWrapper) GetMe(w http.ResponseWriter, r *http.Request)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetMe(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetSettings operation middleware
+func (siw *ServerInterfaceWrapper) GetSettings(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetSettings(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PutSettings operation middleware
+func (siw *ServerInterfaceWrapper) PutSettings(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutSettings(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -204,6 +283,8 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/api/hello", wrapper.GetHello)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/api/me", wrapper.GetMe)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/api/settings", wrapper.GetSettings)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/api/settings", wrapper.PutSettings)
 
 	return m
 }
@@ -301,6 +382,91 @@ func (response GetMedefaultJSONResponse) VisitGetMeResponse(w http.ResponseWrite
 	return err
 }
 
+type GetSettingsRequestObject struct {
+}
+
+type GetSettingsResponseObject interface {
+	VisitGetSettingsResponse(w http.ResponseWriter) error
+}
+
+type GetSettings200JSONResponse SettingsResponse
+
+func (response GetSettings200JSONResponse) VisitGetSettingsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetSettingsdefaultJSONResponse struct {
+	Body       ErrorResponse
+	Headers    ErrorResponseHeaders
+	StatusCode int
+}
+
+func (response GetSettingsdefaultJSONResponse) VisitGetSettingsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if response.Headers.XRequestID != nil {
+		w.Header().Set("X-Request-ID", fmt.Sprint(*response.Headers.XRequestID))
+	}
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PutSettingsRequestObject struct {
+	Body *PutSettingsJSONRequestBody
+}
+
+type PutSettingsResponseObject interface {
+	VisitPutSettingsResponse(w http.ResponseWriter) error
+}
+
+type PutSettings200JSONResponse SettingsResponse
+
+func (response PutSettings200JSONResponse) VisitPutSettingsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PutSettingsdefaultJSONResponse struct {
+	Body       ErrorResponse
+	Headers    ErrorResponseHeaders
+	StatusCode int
+}
+
+func (response PutSettingsdefaultJSONResponse) VisitPutSettingsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if response.Headers.XRequestID != nil {
+		w.Header().Set("X-Request-ID", fmt.Sprint(*response.Headers.XRequestID))
+	}
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// GetHello Returns a greeting message.
@@ -309,6 +475,12 @@ type StrictServerInterface interface {
 	// GetMe Returns the current session's user ID.
 	// (GET /api/me)
 	GetMe(ctx context.Context, request GetMeRequestObject) (GetMeResponseObject, error)
+	// GetSettings Returns the current learning settings.
+	// (GET /api/settings)
+	GetSettings(ctx context.Context, request GetSettingsRequestObject) (GetSettingsResponseObject, error)
+	// PutSettings Saves the learning settings and completes onboarding.
+	// (PUT /api/settings)
+	PutSettings(ctx context.Context, request PutSettingsRequestObject) (PutSettingsResponseObject, error)
 }
 
 type StrictHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error)
@@ -391,6 +563,61 @@ func (sh *strictHandler) GetMe(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetMeResponseObject); ok {
 		if err := validResponse.VisitGetMeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetSettings operation middleware
+func (sh *strictHandler) GetSettings(w http.ResponseWriter, r *http.Request) {
+	var request GetSettingsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetSettings(ctx, request.(GetSettingsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetSettings")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetSettingsResponseObject); ok {
+		if err := validResponse.VisitGetSettingsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PutSettings operation middleware
+func (sh *strictHandler) PutSettings(w http.ResponseWriter, r *http.Request) {
+	var request PutSettingsRequestObject
+
+	var body PutSettingsJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PutSettings(ctx, request.(PutSettingsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PutSettings")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PutSettingsResponseObject); ok {
+		if err := validResponse.VisitPutSettingsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
