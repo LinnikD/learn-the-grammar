@@ -4,6 +4,12 @@ GitHub Issues are the delivery backlog and the concise record of implementation 
 
 Use an Issue for planned backlog work. An Issue is optional for an isolated ad hoc change, such as a small documentation or repository correction that does not need backlog tracking.
 
+## Source of truth
+
+The PRD in `doc/PRD.md` is the sole authoritative version of functional requirements and acceptance criteria. An `FR-X` Issue is a compact tracking card, not a second specification.
+
+An `FR-X` Issue links to its PRD section and lists applicable acceptance-criterion identifiers as a checklist, without copying their text. When a PRD change adds, removes, or reassigns an acceptance criterion for an open Issue, update that Issue's identifier checklist in the same pull request. If a PRD change requires work beyond a closed Issue, create a new Issue; do not rewrite the completed Issue's scope.
+
 ## Finding work and reading status
 
 Use the repository's **Issues** tab and these filters:
@@ -44,7 +50,7 @@ Do not use a `done` label. Closing the Issue is the status for delivered work.
 
 Every Issue states its outcome, scope, and completion conditions.
 
-- An `FR-X` Issue links to its PRD section and lists every applicable acceptance criterion as a checklist. It closes only after all listed criteria are complete.
+- An `FR-X` Issue links to its PRD section and lists every applicable acceptance-criterion identifier as a checklist. It closes only after all listed criteria are complete.
 - A `BUG-X` Issue includes reproduction steps, expected result, actual result, and relevant environment details.
 - An `NFR-X` Issue states the measurable requirement and how it will be verified.
 - A `TASK-X` Issue states the bounded result and why it is needed.

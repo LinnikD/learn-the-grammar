@@ -2,7 +2,7 @@
 
 ## GitHub Issues
 
-Use [doc/ISSUE_WORKFLOW.md](doc/ISSUE_WORKFLOW.md) for the shared process for finding, implementing, and closing GitHub Issues. Treat it as the source of truth for Issue identifiers, labels, status, and links between Issues and pull requests. An Issue is required for planned backlog work and optional for an isolated ad hoc change.
+Use [doc/ISSUE_WORKFLOW.md](doc/ISSUE_WORKFLOW.md) for the shared process for finding, implementing, and closing GitHub Issues. Treat it as the source of truth for Issue identifiers, labels, status, and links between Issues and pull requests. An Issue is required for planned backlog work and optional for an isolated ad hoc change. For functional requirements and acceptance criteria, use `doc/PRD.md` as the sole source of truth.
 
 For every task:
 
