@@ -41,6 +41,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Returns the current learning settings. */
+        get: operations["getSettings"];
+        /**
+         * Saves the learning settings and completes onboarding.
+         * @description Onboarding, once completed, stays completed: a later save never un-completes it.
+         */
+        put: operations["putSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -56,6 +77,21 @@ export interface components {
         MeResponse: {
             /** Format: uuid */
             user_id: string;
+        };
+        /** @enum {string} */
+        Level: "A1" | "A2" | "B1";
+        Topic: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        SettingsResponse: {
+            level: components["schemas"]["Level"];
+            onboarding_completed: boolean;
+            topics: components["schemas"]["Topic"][];
+        };
+        SaveSettingsRequest: {
+            level: components["schemas"]["Level"];
         };
     };
     responses: {
@@ -114,6 +150,52 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MeResponse"];
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    getSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsResponse"];
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    putSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsResponse"];
                 };
             };
             default: components["responses"]["Error"];

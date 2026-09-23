@@ -16,7 +16,7 @@ import (
 
 func TestGetMe_ReturnsAndPersistsSessionUserID(t *testing.T) {
 	manager := session.NewManager([]byte("test-secret"), time.Hour)
-	handler := newMux(manager)
+	handler := newMux(manager, nil)
 	srv := httptest.NewServer(handler)
 	defer srv.Close()
 
@@ -41,7 +41,7 @@ func TestGetMe_ReturnsAndPersistsSessionUserID(t *testing.T) {
 }
 
 func TestGetMe_AcceptsSessionAfterServerRestart(t *testing.T) {
-	firstServer := httptest.NewServer(newMux(session.NewManager([]byte("stable-secret"), time.Hour)))
+	firstServer := httptest.NewServer(newMux(session.NewManager([]byte("stable-secret"), time.Hour), nil))
 	defer firstServer.Close()
 
 	jar, err := cookiejar.New(nil)
@@ -50,7 +50,7 @@ func TestGetMe_AcceptsSessionAfterServerRestart(t *testing.T) {
 	client.Jar = jar
 	userID := requestMe(t, client, firstServer.URL)
 
-	secondServer := httptest.NewServer(newMux(session.NewManager([]byte("stable-secret"), time.Hour)))
+	secondServer := httptest.NewServer(newMux(session.NewManager([]byte("stable-secret"), time.Hour), nil))
 	defer secondServer.Close()
 	assert.Equal(t, userID, requestMe(t, client, secondServer.URL))
 }
@@ -90,7 +90,7 @@ func TestResolveSessionSecret_GeneratesRandomWhenEmpty(t *testing.T) {
 }
 
 func TestAPIRoutingErrors(t *testing.T) {
-	handler := newMux(session.NewManager([]byte("test-secret"), time.Hour))
+	handler := newMux(session.NewManager([]byte("test-secret"), time.Hour), nil)
 	for _, tc := range []struct {
 		method, path string
 		status       int
@@ -129,7 +129,7 @@ func TestHandlerErrorUsesPublicContract(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/api/me", nil)
 	req.AddCookie(&http.Cookie{Name: "ltg_session", Value: token})
 	rec := httptest.NewRecorder()
-	newMux(manager).ServeHTTP(rec, req)
+	newMux(manager, nil).ServeHTTP(rec, req)
 	assert.Equal(t, http.StatusInternalServerError, rec.Code)
 	assert.Equal(t, "application/json", rec.Header().Get("Content-Type"))
 	var body struct {

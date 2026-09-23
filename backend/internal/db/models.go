@@ -3,3 +3,20 @@
 //   sqlc v1.31.1
 
 package db
+
+import (
+	"github.com/jackc/pgx/v5/pgtype"
+)
+
+type Topic struct {
+	ID     pgtype.UUID `json:"id"`
+	Name   string      `json:"name"`
+	Active bool        `json:"active"`
+}
+
+type User struct {
+	ID                    pgtype.UUID        `json:"id"`
+	Level                 string             `json:"level"`
+	OnboardingCompletedAt pgtype.Timestamptz `json:"onboarding_completed_at"`
+	CreatedAt             pgtype.Timestamptz `json:"created_at"`
+}

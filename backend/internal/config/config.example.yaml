@@ -9,7 +9,6 @@ port: 8080
 # sessions — set this explicitly for any long-lived deployment.
 session_secret: ""
 
-# PostgreSQL connection string (see internal/db). Nothing consumes it
-# yet; it exists so features that need persistence can read it from
-# configuration instead of adding their own loading logic.
+# PostgreSQL connection string (see internal/db). Required — the
+# server exits at startup if this is empty.
 database_url: ""

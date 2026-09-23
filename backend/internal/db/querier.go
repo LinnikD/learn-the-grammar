@@ -6,10 +6,17 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
+	GetUserSettings(ctx context.Context, id pgtype.UUID) (GetUserSettingsRow, error)
+	ListActiveTopics(ctx context.Context) ([]ListActiveTopicsRow, error)
 	Ping(ctx context.Context) (int32, error)
+	// Onboarding, once completed, stays completed: a later Save never
+	// clears onboarding_completed_at.
+	SaveUserSettings(ctx context.Context, arg SaveUserSettingsParams) (SaveUserSettingsRow, error)
 }
 
 var _ Querier = (*Queries)(nil)
