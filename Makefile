@@ -13,7 +13,7 @@ FRONTEND_IMAGE := learn-the-grammar-frontend:dev
 	cluster-up cluster-down \
 	ingress-up \
 	images-build images-load \
-	app-deploy app-delete session-secret \
+	app-deploy app-delete session-secret postgres-secret \
 	status \
 	frontend-dev backend-dev \
 	unit-test \
@@ -89,6 +89,13 @@ app-deploy:
 	@echo "Deploying application..."
 	kubectl apply -f k8s/namespace.yaml
 	@$(MAKE) session-secret
+	@$(MAKE) postgres-secret
+	kubectl apply -f k8s/postgres-pvc.yaml
+	kubectl apply -f k8s/postgres-deployment.yaml
+	kubectl apply -f k8s/postgres-service.yaml
+	kubectl rollout status deployment/postgres \
+		--namespace $(NAMESPACE) \
+		--timeout=120s
 	kubectl apply -f k8s/backend-deployment.yaml
 	kubectl apply -f k8s/backend-service.yaml
 	kubectl apply -f k8s/frontend-deployment.yaml
@@ -115,6 +122,19 @@ session-secret:
 		kubectl create secret generic backend-session \
 			--namespace $(NAMESPACE) \
 			--from-literal=signing-key="$$(head -c 32 /dev/urandom | base64)"; \
+	fi
+
+
+postgres-secret:
+	@if kubectl get secret postgres-credentials --namespace $(NAMESPACE) >/dev/null 2>&1; then \
+		echo "Postgres credentials secret already exists"; \
+	else \
+		echo "Creating Postgres credentials secret..."; \
+		pw="$$(openssl rand -hex 24)"; \
+		kubectl create secret generic postgres-credentials \
+			--namespace $(NAMESPACE) \
+			--from-literal=password="$$pw" \
+			--from-literal=database-url="postgres://ltg:$$pw@postgres:5432/ltg?sslmode=disable"; \
 	fi
 
 
