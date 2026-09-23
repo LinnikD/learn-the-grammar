@@ -16,6 +16,18 @@ spec:
         app: backend
 
     spec:
+      initContainers:
+        - name: migrate
+          image: learn-the-grammar-backend:dev
+          imagePullPolicy: Never
+          command: ["./migrate", "up"]
+          env:
+            - name: LTG_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: database-url
+
       containers:
         - name: backend
           image: learn-the-grammar-backend:dev
@@ -31,6 +43,11 @@ spec:
                 secretKeyRef:
                   name: backend-session
                   key: signing-key
+            - name: LTG_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: database-url
 
           readinessProbe:
             httpGet:
